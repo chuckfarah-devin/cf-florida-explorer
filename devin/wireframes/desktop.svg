@@ -114,10 +114,10 @@
 <text x="1030" y="190" font-size="12" font-weight="bold" fill="#1f2328" text-anchor="start">FEMA flood zone at this point</text>
 <text x="1030" y="214" font-size="14" font-weight="bold" fill="#9a6700" text-anchor="start">Zone AE · Coastal floodplain · SFHA: yes</text>
 <text x="1030" y="232" font-size="10" font-weight="normal" fill="#1f2328" text-anchor="start">BFE 8.0 NAVD88 (unit n/s) · Panel 12099C0793G · eff. 2024-12-20</text>
-<rect x="1030" y="238" width="251.41666666666666" height="20" rx="10" fill="#fff8c5" stroke="#d4a72c" stroke-width="1"/>
-<text x="1155.7083333333333" y="252" font-size="11" font-weight="normal" fill="#7d4e00" text-anchor="middle">⚠ Near boundary: X (0.2%) within 15 m</text>
-<rect x="1287.4166666666667" y="238" width="43.16666666666667" height="20" rx="10" fill="#ddf4ff" stroke="#54aeff" stroke-width="1"/>
-<text x="1309.0" y="252" font-size="10" font-weight="normal" fill="#0550ae" text-anchor="middle">E1 E2</text>
+<rect x="1030" y="238" width="264.25" height="20" rx="10" fill="#fff8c5" stroke="#d4a72c" stroke-width="1"/>
+<text x="1162.125" y="252" font-size="11" font-weight="normal" fill="#7d4e00" text-anchor="middle">⚠ Another mapped zone found within 15 m</text>
+<rect x="1300.25" y="238" width="43.16666666666667" height="20" rx="10" fill="#ddf4ff" stroke="#54aeff" stroke-width="1"/>
+<text x="1321.8333333333333" y="252" font-size="10" font-weight="normal" fill="#0550ae" text-anchor="middle">E1 E2</text>
 <circle cx="1384" cy="182" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
 <text x="1384" y="186.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">8</text>
 <rect x="1018" y="274" width="378" height="92" rx="6" fill="#fff" stroke="#8a8f98" stroke-width="1"/>
@@ -146,7 +146,7 @@
 <text x="1030" y="552" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">  effective 2024-12-20.</text>
 <rect x="1328" y="538" width="43.16666666666667" height="20" rx="10" fill="#ddf4ff" stroke="#54aeff" stroke-width="1"/>
 <text x="1349.5833333333333" y="552" font-size="10" font-weight="normal" fill="#0550ae" text-anchor="middle">E1 E2</text>
-<text x="1030" y="569" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">• A Zone X (0.2% annual chance) boundary is</text>
+<text x="1030" y="569" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">• Another mapped flood zone was found</text>
 <text x="1030" y="586" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">  within 15 m.</text>
 <rect x="1328" y="572" width="25.666666666666664" height="20" rx="10" fill="#ddf4ff" stroke="#54aeff" stroke-width="1"/>
 <text x="1340.8333333333333" y="586" font-size="10" font-weight="normal" fill="#0550ae" text-anchor="middle">E1</text>

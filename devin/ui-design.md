@@ -75,12 +75,12 @@ Plain text is generated from the verified `FLD_ZONE` / `ZONE_SUBTY` fact using a
 | D | "FEMA's map shows the flood hazard here as undetermined." |
 | `in_coverage_no_zone` | "FEMA's map covers this spot but shows no flood zone here. That's a gap in the map, not a sign of low risk." |
 | `outside_nfhl_coverage` | "FEMA's digital flood map doesn't cover this spot." |
-| `classified_near_boundary` / `nearbyZones` | adds "FEMA's map shows a different flood zone within 15 m of this spot." (15 m is the verified buffer distance, D8; boundaries on the map are approximate) |
+| `classified_near_boundary` / `nearbyZones` | adds "Another mapped flood zone was found within 15 m." (15 m is Florida Explorer's chosen boundary-check radius, D8. It is not FEMA's stated accuracy, and the sentence must not imply surveyed precision) |
 
 Wording rules:
 - The sentence always says what **FEMA maps**. It never claims the property has that probability.
 - No "risky", "safe", "low risk" or "a few steps away".
-- Distances appear only when computed from source geometry (the boundary buffer, or a distance to a polygon).
+- Distances appear only when computed from source geometry (a distance to a polygon) or when they are our own check radius, described as such ("was found within 15 m"). They are never presented as FEMA accuracy or surveyed precision.
 - In technical details, "1% annual chance" is explained as FEMA's regulatory definition for the mapped area, not a property-level forecast.
 
 ### 0.5 Readable source labels
@@ -206,10 +206,10 @@ Only one point is active at a time. Area selection is out of scope (PRD future).
 | State (source-feasibility.md) | Card copy (fixed) | Visual |
 |---|---|---|
 | `classified` | "Zone AE · Coastal floodplain · SFHA: yes" + BFE/datum + panel + effective date | Zone colour bar |
-| `classified_near_boundary` | As above, plus the chip "Near boundary: X (0.2%) within 15 m" | Amber chip |
+| `classified_near_boundary` | As above, plus the chip "Another mapped flood zone was found within 15 m" (the zone code goes in details) | Amber chip |
 | `in_coverage_no_zone` | "FEMA's digital map covers this point but returned no flood-zone polygon. This is a data gap, not a finding of low risk." | Grey, dashed border |
 | `outside_nfhl_coverage` | "FEMA's digital flood map does not cover this point." | Grey, dashed border |
-| either of the two above with `nearbyZones` | adds "FEMA maps Zone AE within 15 m of this point" | Amber chip |
+| either of the two above with `nearbyZones` | adds "Another mapped flood zone was found within 15 m" | Amber chip |
 | `ambiguous_overlap` | "FEMA returned more than one zone here: AE, X" | Amber |
 | `coverage_unknown` / failure | "FEMA flood data is unavailable right now. Retry" (other sources still shown) | Red outline, Retry button |
 | stale cache | Normal content plus "Retrieved <date> (stale)" | Clock icon |

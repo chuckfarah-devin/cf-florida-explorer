@@ -29,6 +29,23 @@ Kept from the Devin Review rounds:
 - **Number typing:** identifiers, dates, coordinates, distances and quantities are each checked against their own field, and only quantities need a unit and datum (evidence-and-agent-design.md §4.6; test N20).
 - **Buffer evaluated for no-zone and out-of-coverage points:** `nearbyZones` (source-feasibility.md FEMA rules; test N21).
 
+## Pre-implementation checklist: four review findings
+
+| # | Finding | Resolution (document section) | Acceptance tests (validation-plan.md) | Status |
+|---|---|---|---|---|
+| 1 | Signed MLLW ↔ NAVD88 conversion | source-feasibility.md **§S03a**: `h_B = h_A + (Z_A − Z_B)`. At 8722670, forward `h_NAVD88 = h_MLLW − 2.51 ft` (3.00 → 0.49) and reverse `h_MLLW = h_NAVD88 + 2.51 ft` (0.49 → 3.00); the sign was confirmed live (3.284 MLLW / 0.778 NAVD). evidence-and-agent-design.md **§4.6** points to the same rule | **N11** (forward), **N11b** (reverse, round trip, live cross-check ≤ 0.01 ft), **N11c** (units mismatch / missing datum → reject); AC11 row | Resolved in design |
+| 2 | Structured facts checked against source values | evidence-and-agent-design.md **§3** (`facts[]`), **§4.6** (numbers typed by kind), **§4.9** (fact equality), **§4.10 + §4a** (text rendered from verified facts; model prose audit-only); ui-design.md **§0.4** (flood copy keyed by the verified fact) | **N13**, **N14**, **N15**, **N16**, **N20**, **N23**; AC04 row | Resolved in design; **D11 and U7 need your approval** |
+| 3 | Validation of every visible answer field | evidence-and-agent-design.md **§3** (no free-text channel), **§4b** (coded unknowns/limitations, typed params, `basis` re-derived, server-owned source status); ui-design.md **§3.6** | **N17**, **N18**, **N21**, **N25**; AC04 row | Resolved for answers; **U8 open** (see below) |
+| 4 | Separate FEMA no-zone vs no-coverage fixtures | source-feasibility.md **FEMA point rules** (layer 0 decides; `coverage_unknown`; buffer always evaluated); validation-plan.md **§4a**; ui-design.md **§3.1/§3.4** (outside-Florida rejected before any query) | **NZ-1/N01b** (inside coverage, no zone), **OC-1, OC-2/N01** (outside coverage, live), **FL-1/N01c** (lookup failed), **IC-1** (control), **OUT-1/N02, N22** (outside Florida); AC07 requires pairwise-distinct state, copy and limitation | Resolved in design; **NZ-1 is synthetic** |
+
+Still unresolved:
+- **NZ-1 has no real point yet.** No real "inside coverage, no zone" location was found; FEMA's layer 28 ended exactly at the coverage edge on the transect. The synthetic fixture stands until a search during the build finds one.
+- **D8:** the 15 m check radius is our choice and needs your approval. Copy uses "Another mapped flood zone was found within 15 m." The NAD83→WGS84 transformation FEMA's server applies is unverified, and it matters only for boundary cases.
+- **D11 / U7:** templates vs checked model prose, and the exact plain-language flood wording table.
+- **U8:** the one-line place description is the only visible text with no evidence source. It must be omitted or curated (owner-approved, labelled editorial) before Explore this place ships.
+- **Datum offsets are per station.** Only 8722670's datums were checked; other stations are checked when the curated station table is built in I3.
+- **D1 (map SDK and key) blocks I1;** D2 (event window) blocks BB-01 only.
+
 ## UI design
 
 [ui-design.md](ui-design.md) has annotated desktop and mobile wireframes (`wireframes/desktop.svg`, `wireframes/mobile.svg`) and the interaction specification: point selection and switching, layers, FEMA and NOAA cards with every state, Ask This Place, citation chips and source details, responsive behaviour and accessibility. It also lists open UI decisions U1–U6.
