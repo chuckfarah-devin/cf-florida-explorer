@@ -84,13 +84,13 @@ Citations show a readable label. The evidence ID (`E1`) is kept for audit and ap
 | Evidence | Label shown |
 |---|---|
 | FEMA NFHL layers 28/3/0 | "FEMA flood map" |
-| NOAA CO-OPS observed water level | "NOAA tide gauge · Lake Worth Pier" |
-| NOAA CO-OPS predictions | "NOAA tide forecast · Ocean Ridge" |
+| NOAA CO-OPS observed water level | "NOAA tide gauge · {station name}" (e.g. "NOAA tide gauge · Lake Worth Pier") |
+| NOAA CO-OPS predictions | "NOAA tide forecast · {station name}", e.g. "NOAA tide forecast · Ocean Ridge (Intracoastal)" for 8722718 and "NOAA tide forecast · Lake Worth Pier (ocean)" for 8722670 |
 | FDEP/FNAI conservation lands (proposed) | "Florida conservation lands" |
 | USFWS NWI (proposed) | "Wetlands inventory" |
 | FDEP aquatic preserves (proposed) | "Florida aquatic preserves" |
 
-If one claim cites two records from the same source, they share a single label, with both records listed in the details.
+Station labels are built from the cited record's own station name and water body, never from a fixed string, so predictions from different stations can't be confused. If one claim cites two records from the same source, they share a single label, with both records listed in the details.
 
 ### 0.6 Explore this place
 
