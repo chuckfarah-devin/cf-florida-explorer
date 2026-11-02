@@ -38,6 +38,8 @@ Full-screen map with a bottom sheet that has three snap points: A collapsed (≈
 | Place search | Geocoder suggestions (provider per D1). Choosing one sets the point; the chip shows coordinates, not just the name |
 | Copy | Copies coordinates in `lat, lon` decimal degrees |
 
+**One bounds check for every input.** Click, tap, keyboard centre selection, typed coordinates and place search all go through the same Florida-envelope check (the same bounds as the API, technical-design.md / source-feasibility.md rule 5) before the point changes. Out-of-bounds selections don't move the crosshair, don't start a new `selectionId` and send no request. The previous point and its results stay, and the message reads "This point is outside Florida; Florida Explorer covers Florida only". If the API still rejects a point (for example, the bounds drift between client and server), the panel shows that rejection message, not an empty or loading state.
+
 Only one point is active at a time. Area selection is out of scope (PRD future).
 
 ### 3.2 Changing the point (R04, AC05)
