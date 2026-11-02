@@ -1,8 +1,138 @@
 # UI design and interaction specification
 
-Status: UI proposal for Chuck's review before any build (G1). Wireframes are static annotated drawings. **Implementation NOT authorized.** There is no application code, no scaffold and no dependencies. Values shown (Zone AE, panel 12099C0793G, stations 8722670/8722718) are taken from the live source checks in source-feasibility.md and are illustrative layout content, not validated answers.
+Status: UI proposal for Chuck's review before any build (G1). **Implementation and deployment NOT authorized.** There is no application code, no scaffold and no dependencies. The mockups are static images, and all sample content in them is **illustrative**: not live data and not validated answers. Where sample values come from this session's live source checks (Zone AE, panel 12099C0793G, Lake Worth Pier, the three Palm Beach County natural areas), they only show realistic layout.
 
-## 1. Wireframes
+## 0. Revision 2: visual proposal for a general-public audience
+
+### 0.1 Mockups
+
+**Desktop: Explore this place**
+
+![Desktop: Explore this place](mockups/desktop-1-explore.png)
+
+**Desktop: Ask This Place answer with expanded source**
+
+![Desktop: answer](mockups/desktop-2-answer.png)
+
+**Desktop: Nature & Wildlife**
+
+![Desktop: Nature & Wildlife](mockups/desktop-3-nature.png)
+
+**Mobile: explore, answer, map layers, Nature & Wildlife**
+
+![Mobile screens](mockups/mobile-screens.png)
+
+### 0.2 Design principles
+
+1. **Place first.** Lead with the place name and one plain sentence. Coordinates sit behind "Show exact location".
+2. **Plain language up front, technical detail on request.**
+   - Visible by default: plain-language explanations, readable source labels and suggested questions.
+   - Behind expanders ("Technical details", "Sources used"): FEMA zone codes, map panels, station IDs, datums, retrieval times and coordinates.
+3. **Inviting, not alarming.** Warm palette, generous spacing and a calm map. Risk words are factual ("higher-risk flood area"), with no red alarm styling for regulatory categories.
+4. **Uncertainty is visible but compact.** Each answer has one "What this can't tell you" line that expands to the full list of limitations. Caveats don't fill the main screen.
+5. **No implied verification.** There are no "verified", "confirmed" or checkmark badges on answers or places. The evidence safeguards (fact-checked claims, coded limitations) work behind the scenes. When the model is unavailable, a plain line says "Short answer from source records (assistant unavailable)".
+6. **Honest scope.** Capabilities that aren't integrated are shown as "Coming later" or "Proposed", never as live.
+
+### 0.3 Visual system (proposed)
+
+| Token | Value | Use |
+|---|---|---|
+| Ink | `#1C2B33` (secondary `#4A5A63`, tertiary `#73828A`) | Text: 4.5:1+ on sand and white |
+| Sand | `#F7F3EC` | App background |
+| Card | `#FFFFFF`, 14 px radius, 1 px `#EBE7DE` border | Content cards |
+| Teal (primary) | `#0D6B78` / dark `#0A5560` / tint `#E3F1F2` | Buttons, links, active tab, suggested questions |
+| Sun | `#F2C14E` | Brand mark only |
+| Coral | `#E2603F` | Selected-place pin only |
+| Flood: higher risk | Blue `#3B5BA5` with diagonal hatch | FEMA 1% annual chance zones (A*, V*); VE darker fill |
+| Flood: moderate | Light blue `#8DB5DC` with dots | FEMA X (0.2%) |
+| Wetlands | Teal-green `#3F9C86` with wave pattern | NWI |
+| Conservation | Green `#7CB46B`, solid outline | Conservation lands |
+| Aquatic preserve | Aqua `#1793A8`, dashed outline | FDEP preserves |
+| Shoreline | Brown `#6B4F3A` line | NOAA shoreline |
+
+- **Typography (proposed):**
+  - Headings: a warm serif (proposed *Fraunces*, 28–30 px desktop, 22–25 px mobile).
+  - UI and body: a humanist sans (proposed *Source Sans 3*, 14–15 px body, 12–13 px meta).
+  - The mockups render with metric-compatible fallbacks (DejaVu Serif / Liberation Sans) because no fonts were installed.
+- **Spacing:** 4 px base (8/12/16/22 px), with 22 px panel padding on desktop and 18 px on mobile.
+- **Touch targets:** at least 44 px.
+- **Map styling:**
+  - Muted land and water basemap so overlays read clearly; light street grid; place labels in dark grey.
+  - Every overlay uses colour **plus** pattern or line style, so it survives colour-blindness and print.
+  - A compact legend pill shows only the active layers.
+  - The selected place is a coral pin with a name label.
+
+### 0.4 Plain-language flood copy (template keyed by the verified FEMA fact)
+
+Plain text is generated from the verified `FLD_ZONE` / `ZONE_SUBTY` fact using an owner-approved table, so the fact-checking safeguards still apply (evidence-and-agent-design.md §4.9–4a). The technical code always appears in "Technical details".
+
+| FEMA fact | Plain-language headline (proposed wording) |
+|---|---|
+| A, AE, AH, AO, AR, A99 | "Higher-risk flood area: about a 1% chance of flooding each year" |
+| V, VE | "Highest-risk coastal flood area: flooding plus waves, about a 1% chance each year" |
+| X with 0.2% subtype | "Moderate-risk flood area: about a 0.2% chance each year" |
+| X (minimal) | "Lower-risk area on FEMA's map. Flooding can still happen" |
+| D | "FEMA hasn't determined the flood risk here" |
+| `in_coverage_no_zone` | "FEMA's map covers this spot but shows no flood zone here, which is a gap in the map rather than a sign of low risk" |
+| `outside_nfhl_coverage` | "FEMA's digital flood map doesn't cover this spot" |
+| near boundary / `nearbyZones` | adds "A different flood category starts a few steps away" |
+
+### 0.5 Readable source labels
+
+Citations show a readable label. The evidence ID (`E1`) is kept for audit and appears only in source details.
+
+| Evidence | Label shown |
+|---|---|
+| FEMA NFHL layers 28/3/0 | "FEMA flood map" |
+| NOAA CO-OPS observed water level | "NOAA tide gauge · Lake Worth Pier" |
+| NOAA CO-OPS predictions | "NOAA tide forecast · Ocean Ridge" |
+| FDEP/FNAI conservation lands (proposed) | "Florida conservation lands" |
+| USFWS NWI (proposed) | "Wetlands inventory" |
+| FDEP aquatic preserves (proposed) | "Florida aquatic preserves" |
+
+If one claim cites two records from the same source, they share a single label, with both records listed in the details.
+
+### 0.6 Explore this place
+
+- Shows the place name (from the geocoder or Census place record), a one-line description and up to three summary cards: Flooding, Tides nearby, Nature nearby (proposed, C8).
+- Each card has one plain sentence, a source label and one expander.
+- Suggested questions sit under the Ask box: "Could this area flood?", "What are king tides?", "What's protected near here?", "How high do tides get?".
+- **Gap flagged:** the one-line place description isn't from a current evidence source. Options are U8 (a curated, owner-approved blurb labelled as editorial, a sourced description, or omit it in the MVP). Until decided, the mockup sentence is illustrative only.
+
+### 0.7 Ask This Place
+
+- One question bubble, a short answer in two to four sentences, and readable source labels after each claim.
+- One "What this can't tell you" line, then "Sources used (n)" expanding to source cards with technical rows.
+- Follow-ups stay bound to the same place, and the header shows the place name with "Answers are about this spot only".
+
+### 0.8 Map layers
+
+- The layer panel is discoverable: a floating card on desktop, a bottom sheet on mobile.
+- Layers: **Flooding** (baseline), **Wetlands**, **Conservation areas**, **Aquatic preserves**, **Shoreline** (proposed, C7 — tagged "Proposed" in the mockups) and **Tide stations**.
+- Each row shows a swatch, a plain name and a source subtitle. Tapping the name opens "What's this?" with the source, date and limitations.
+- Fixed note: "Layers help you look around. What we say about your spot comes from each source's own records."
+
+### 0.9 Nature & Wildlife
+
+- Two explicit concepts:
+  - **"Seen here":** a reported sighting at a place and date. It doesn't mean the species lives there.
+  - **"Could live here":** mapped likely habitat. It doesn't mean anyone has seen it there.
+- Live in the proposal: protected places nearby and wetlands (C7/C8).
+- Shown as **Coming later:** wildlife sightings (iNaturalist candidate) and likely rare-species habitat (FNAI Biodiversity Matrix, pending data-use permission). Details are in layer-reuse-feasibility.md §4.
+- Example content is labelled "Example layout — not live data".
+
+### 0.10 What changed from round 1
+
+The round-1 interaction spec below still applies, with these changes:
+- Coordinates, codes and IDs move behind expanders.
+- Citation chips show readable labels.
+- The "Built from verified evidence" badge is removed.
+- The layer list grows (proposed).
+- Nature & Wildlife becomes a real tab.
+
+The round-1 structural wireframes are kept for layout and annotation reference. Where they differ, these mockups win on look and content.
+
+## 1. Structural wireframes (round 1 — layout reference)
 
 ### Desktop (≥ 1024 px)
 
@@ -87,7 +217,7 @@ Outside-Florida input is rejected at selection time (§3.1). It never reaches th
 - Disabled with a reason ("Waiting for evidence for this point…") until the evidence pack exists. If some sources failed, Ask is allowed and the answer is partial.
 - In-progress text: "Checking answer against sources…". The answer appears in an `aria-live="polite"` region, and only after validation.
 - **Answer layout:**
-  - Header "Answer for <coords>" and a mode badge: "Built from verified evidence", or "Template answer (model unavailable)".
+  - Header with the place name ("Answers are about this spot only"). **No verification badge.** In template mode, a plain line reads "Short answer from source records (assistant unavailable)".
   - Findings as short bullets, each ending in citation chips `E1 E2`.
   - Optional inference bullets in a distinct style, labelled "Inference" with their assumptions.
   - "What the evidence can't say" for unknowns and limitations, using fixed, validated wording.
@@ -98,7 +228,7 @@ Outside-Florida input is rejected at selection time (§3.1). It never reaches th
 
 ### 3.7 Citations and source details (R05, AC04)
 
-- A citation chip is a button. Activating it expands that source in the "Sources" accordion, scrolls to it and moves focus to its heading. Esc or "Back to answer" returns focus to the chip.
+- A citation chip shows a readable source label (§0.5) and is a button. Activating it expands that source in the "Sources" accordion, scrolls to it and moves focus to its heading. Esc or "Back to answer" returns focus to the chip.
 - Each source detail shows:
   - Evidence ID, provider and dataset, and evidence class (regulatory classification / measured observation / predicted tide).
   - Spatial relation (point inside polygon / station 11.7 km N).
@@ -154,4 +284,7 @@ Outside-Florida input is rejected at selection time (§3.1). It never reaches th
 | U3 | Default map view | Statewide Florida on first load; no geolocation prompt until the user presses Locate |
 | U4 | Earlier-point answers kept in the session | Yes, collapsed, with coordinates; cleared on reload (retention per D6) |
 | U5 | NOAA mini-chart in MVP or table only | Table first; chart if time allows (same data) |
-| U6 | Brand and visual style | Neutral wireframe style now; visual design after G2 |
+| U6 | Brand and visual style | Visual system in §0.3 as the starting point; refine after G2 |
+| U7 | Plain-language flood wording (§0.4) | Owner approves the exact wording before I2 |
+| U8 | One-line place description in "Explore this place" | Omit in MVP or use owner-approved curated blurbs labelled editorial; never model-generated |
+| U9 | Show "Proposed" layers and "Coming later" Nature cards | Show, clearly labelled, so the scope is legible without implying live data |

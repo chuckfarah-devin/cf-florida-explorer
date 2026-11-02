@@ -143,8 +143,8 @@
 <circle cx="1246" cy="158" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
 <text x="1246" y="162.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">9</text>
 <text x="904" y="194" font-size="11" font-weight="normal" fill="#57606a" text-anchor="start" font-style="italic">Q: What does the evidence tell us about flooding here?</text>
-<rect x="904" y="204" width="177.33333333333334" height="20" rx="10" fill="#dafbe1" stroke="#4ac26b" stroke-width="1"/>
-<text x="992.6666666666666" y="218" font-size="10" font-weight="normal" fill="#116329" text-anchor="middle">Built from verified evidence</text>
+<rect x="904" y="204" width="165.66666666666666" height="20" rx="10" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1"/>
+<text x="986.8333333333334" y="218" font-size="10" font-weight="normal" fill="#57606a" text-anchor="middle">Answer from source records</text>
 <text x="904" y="246" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">• FEMA maps this point in Zone AE</text>
 <text x="904" y="266" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">  (Coastal floodplain, SFHA), effective</text>
 <text x="904" y="286" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">  2024-12-20.</text>

@@ -73,3 +73,5 @@ Cost controls: per-IP rate limit on `/ask` (e.g., 20/hour), max question length 
 | D9 | Baseline changes C1–C6 | Accept / reject each | Accept |
 | D10 | Freshness TTLs | source-feasibility.md table | Accept or amend |
 | D11 | How answer text is produced | (a) claim text rendered from verified structured facts by templates; model selects/orders facts and routes the question. (b) model prose checked by an entity/number extractor against facts | (a): only option where every rendered statement is checked against source values (evidence-and-agent-design.md §4a) |
+| D12 | Reference layers in first increment (C7) and Nature facts (C8) | (a) keep baseline (flood + NOAA only); (b) C7 display-only layers in I1; (c) C7 + C8 | (b) now, decide C8 at I3 (layer-reuse-feasibility.md §3) |
+| D13 | Evidence-class extension (C9) | add `mapped_feature` now; reserve `species_observation`, `habitat_model` | Accept with evidence-contract.md review |

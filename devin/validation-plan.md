@@ -99,6 +99,10 @@ Assertions per fixture: state code, rendered copy, limitation code, and that no 
 | N20 | Identifiers and dates in text | "Station 8722670 … on 2025-10-10", "panel 12099C0793G effective 2024-12-20" citing matching records | accepted: ids/dates checked against id/date fields, no unit or datum required; wrong id (8722671) or date → rejected | Design |
 | N21 | No zone at point, zone in buffer | NZ-1 variant: layer 0 hit, exact layer 28 empty, buffer returns AE; and OC variant: layer 0 empty, buffer returns VE | state stays `in_coverage_no_zone` / `outside_nfhl_coverage`, `nearbyZones` lists the zone, near-boundary warning + `NEAR_MAPPED_ZONE` shown; buffer failure → `BOUNDARY_CHECK_UNAVAILABLE` | Synthetic |
 | N22 | Out-of-bounds map selection | click/tap, keyboard centre select and place-search result at 25.00, -78.00 | same rejection as typed input (N02): crosshair and current point unchanged, no request, message shown; server rejection, if forced, renders the same message | Design |
+| N23 | Plain-language flood copy | each FEMA state/zone fixture (BB-P1, BB-P2, NZ-1, OC-1, near-boundary) | headline equals the §0.4 template for the verified fact; technical code present in details; copy never says "safe" | Design |
+| N24 | Readable source labels | answers citing FEMA, NOAA obs and NOAA predictions | each claim shows the mapped label (ui-design.md §0.5), never only `E#`; details show `E#` | Design |
+| N25 | No verification badge | all answer modes | no "verified", "confirmed" or check-mark badge on answers or places; template mode shows the plain notice | Design |
+| N26 | Sightings vs habitat (future) | synthetic `species_observation` and `habitat_model` records at one point | rendered in separate sections with "Seen here" / "Could live here"; neither class supports the other's claims | Synthetic |
 | N18 | Unsupported unknown | `NO_ICWW_OBS_STATION` when pack has an ICWW water-level station | dropped (basis re-derivation fails) | Design |
 
 ## 6. Run evidence (post-approval)

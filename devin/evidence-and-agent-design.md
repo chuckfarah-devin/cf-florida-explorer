@@ -23,7 +23,7 @@ Status: conceptual design for owner review (G1). No executable schema. Implement
 | `freshness` | `fresh` / `stale(retrievedAt)` | — |
 | `allowedClaims` | `["zone_membership", "sfha_status", "bfe_value"]` | — |
 
-Evidence classes (closed set): `regulatory_classification`, `measured_observation`, `predicted_tide`, `modeled_scenario`, `historical_report`, `user_report`, `inference`. MVP connectors emit only the first three; `user_report` is what the user tells us and is stored only in the conversation.
+Evidence classes (closed set): `regulatory_classification`, `measured_observation`, `predicted_tide`, `modeled_scenario`, `historical_report`, `user_report`, `inference`. MVP connectors emit only the first three; `user_report` is what the user tells us and is stored only in the conversation. Proposed C9 (layer-reuse-feasibility.md) adds `mapped_feature` (wetland, conservation, preserve boundaries) and reserves `species_observation` and `habitat_model`, so sightings and likely habitat can never be merged. Each source has a readable display label (ui-design.md §0.5); the evidence ID stays the audit key.
 
 ## 2. Evidence pack
 

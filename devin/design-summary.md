@@ -33,9 +33,16 @@ Kept from the Devin Review rounds:
 
 [ui-design.md](ui-design.md) has annotated desktop and mobile wireframes (`wireframes/desktop.svg`, `wireframes/mobile.svg`) and the interaction specification: point selection and switching, layers, FEMA and NOAA cards with every state, Ask This Place, citation chips and source details, responsive behaviour and accessibility. It also lists open UI decisions U1–U6.
 
+## Revision 2: public-facing visual proposal
+
+- **Mockups:** [ui-design.md §0](ui-design.md) has polished desktop and mobile mockups (`mockups/*.png`, all content illustrative). It also has the visual system, the plain-language flood copy table, the readable source labels and the Nature & Wildlife "Seen here" vs "Could live here" concepts.
+- **No verification badges.** Uncertainty is shown in one compact line per answer.
+- **Analyzer layers:** [layer-reuse-feasibility.md](layer-reuse-feasibility.md) records live checks of the analyzer's wetlands, conservation, aquatic-preserve and shoreline services. It proposes scope changes **C7** (display-only layers in I1, ≈ +1.5 d), **C8** (nature facts, new I3b ≈ +2 d) and **C9** (new evidence classes). None is applied without D12/D13.
+- **Unchanged:** the bounds-check rule (N22) and all evidence safeguards. New tests N23–N26.
+
 ## Unresolved decisions (details in cost-security-and-decisions.md §6)
 
-D1 map SDK · D2 Briny Breezes point and event window · D3 NOAA overlay vs station-first · D4 hosting · D5 model provider and budget · D6 retention · D7 analyzer reuse permission · D8 thresholds (AC01 1e-5°, 15 m FEMA buffer, 25 km station radius, performance/a11y) · D9 baseline changes C1–C6 · D10 cache TTLs · D11 answer text from verified facts (templates) vs checked model prose · U1–U6 UI decisions (ui-design.md §5).
+D1 map SDK · D2 Briny Breezes point and event window · D3 NOAA overlay vs station-first · D4 hosting · D5 model provider and budget · D6 retention · D7 analyzer reuse permission · D8 thresholds (AC01 1e-5°, 15 m FEMA buffer, 25 km station radius, performance/a11y) · D9 baseline changes C1–C6 · D10 cache TTLs · D11 answer text from verified facts (templates) vs checked model prose · D12 reference layers / nature facts (C7, C8) · D13 evidence classes (C9) · U1–U9 UI decisions (ui-design.md §5).
 
 ## Items not verified this session
 
@@ -53,5 +60,6 @@ Esri licensing/free tier/attribution rules; FEMA and NOAA exact terms URLs and q
 - [ ] Hosting and model provider chosen; budget cap set
 - [ ] Analyzer reuse permission decided
 - [ ] Baseline changes C1–C6 accepted/rejected
-- [ ] UI wireframes and interaction spec accepted or amended (U1–U6)
+- [ ] Visual mockups, plain-language copy and interaction spec accepted or amended (U1–U9)
+- [ ] Layer scope decided (D12: C7/C8) and evidence classes (D13: C9)
 - [ ] First increment explicitly approved (G2) — or design changes requested
