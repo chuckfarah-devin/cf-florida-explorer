@@ -39,6 +39,11 @@ Kept from the Devin Review rounds:
 - **No verification badges.** Uncertainty is shown in one compact line per answer.
 - **Analyzer layers:** [layer-reuse-feasibility.md](layer-reuse-feasibility.md) records live checks of the analyzer's wetlands, conservation, aquatic-preserve and shoreline services. It proposes scope changes **C7** (display-only layers in I1, ≈ +1.5 d), **C8** (nature facts, new I3b ≈ +2 d) and **C9** (new evidence classes). None is applied without D12/D13.
 - **Unchanged:** the bounds-check rule (N22) and all evidence safeguards. New tests N23–N26.
+- **Refinements after Chuck approved the look and interaction direction:**
+  - Ask This Place is pinned so it's always visible (N31).
+  - Flood wording is now "FEMA maps this spot in an area with a 1% annual chance of flooding", with distances only from computed geometry (N23).
+  - Nature cards show distance to the boundary and "Show on map", plus a public-access caveat.
+  - Map controls have descriptive text labels (N32).
 
 ## Unresolved decisions (details in cost-security-and-decisions.md §6)
 

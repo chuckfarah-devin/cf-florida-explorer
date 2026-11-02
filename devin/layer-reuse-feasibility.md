@@ -28,6 +28,17 @@ The analyzer has five layers, each described by a declarative `EnvironmentalLaye
 
 All services accepted `inSR=4326` point queries with server-side transformation. No credentials were needed.
 
+**Distances to nearby protected places** (used in the mockups). These are computed from the live conservation-lands geometry (`outSR=4326`), measuring from BB-P1 to each polygon boundary with a local planar approximation; the reference GIS cross-check is pending (N29):
+
+| Area | Managing agency | Distance to boundary | Direction (to centroid) |
+|---|---|---|---|
+| Ocean Ridge Natural Area | Palm Beach County | 1.22 km | N |
+| Seacrest Scrub Natural Area | Palm Beach County | 1.75 km | SW |
+| North Ocean Ridge Mangroves Natural Area | Palm Beach County | 2.21 km | N |
+| Ocean Ridge Hammock Park | Palm Beach County | 2.55 km | N |
+
+Each record carries `MA_WEBSITE` (here the county's ERM or parks page), which supports the "managing agency" link. Protection status (`PROTSTAT`) says nothing about public access, so the UI always shows an access caveat.
+
 ## 2. Reuse assessment
 
 | Analyzer element | Verdict | Notes |

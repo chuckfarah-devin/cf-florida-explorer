@@ -68,14 +68,20 @@ Plain text is generated from the verified `FLD_ZONE` / `ZONE_SUBTY` fact using a
 
 | FEMA fact | Plain-language headline (proposed wording) |
 |---|---|
-| A, AE, AH, AO, AR, A99 | "Higher-risk flood area: about a 1% chance of flooding each year" |
-| V, VE | "Highest-risk coastal flood area: flooding plus waves, about a 1% chance each year" |
-| X with 0.2% subtype | "Moderate-risk flood area: about a 0.2% chance each year" |
-| X (minimal) | "Lower-risk area on FEMA's map. Flooding can still happen" |
-| D | "FEMA hasn't determined the flood risk here" |
-| `in_coverage_no_zone` | "FEMA's map covers this spot but shows no flood zone here, which is a gap in the map rather than a sign of low risk" |
-| `outside_nfhl_coverage` | "FEMA's digital flood map doesn't cover this spot" |
-| near boundary / `nearbyZones` | adds "A different flood category starts a few steps away" |
+| A, AE, AH, AO, AR, A99 | "FEMA maps this spot in an area with a 1% annual chance of flooding." |
+| V, VE | "FEMA maps this spot in a coastal area with a 1% annual chance of flooding, where waves add to the hazard." |
+| X with 0.2% subtype | "FEMA maps this spot in an area with a 0.2% annual chance of flooding." |
+| X (minimal) | "FEMA maps this spot outside its 1% and 0.2% annual-chance flood areas. Flooding can still happen." |
+| D | "FEMA's map shows the flood hazard here as undetermined." |
+| `in_coverage_no_zone` | "FEMA's map covers this spot but shows no flood zone here. That's a gap in the map, not a sign of low risk." |
+| `outside_nfhl_coverage` | "FEMA's digital flood map doesn't cover this spot." |
+| `classified_near_boundary` / `nearbyZones` | adds "FEMA's map shows a different flood zone within 15 m of this spot." (15 m is the verified buffer distance, D8; boundaries on the map are approximate) |
+
+Wording rules:
+- The sentence always says what **FEMA maps**. It never claims the property has that probability.
+- No "risky", "safe", "low risk" or "a few steps away".
+- Distances appear only when computed from source geometry (the boundary buffer, or a distance to a polygon).
+- In technical details, "1% annual chance" is explained as FEMA's regulatory definition for the mapped area, not a property-level forecast.
 
 ### 0.5 Readable source labels
 
@@ -95,6 +101,7 @@ Station labels are built from the cited record's own station name and water body
 ### 0.6 Explore this place
 
 - Shows the place name (from the geocoder or Census place record), a one-line description and up to three summary cards: Flooding, Tides nearby, Nature nearby (proposed, C8).
+- **Ask This Place is always visible.** On desktop it is pinned to the bottom of the place panel: the Ask box plus one row of suggested questions, with a top shadow. Cards scroll above it, and it never scrolls out of view. On mobile it stays in the collapsed and half sheets as the primary button or box. Acceptance: at 1366×768 and 360×800 the Ask box is visible without scrolling (N31).
 - Each card has one plain sentence, a source label and one expander.
 - Suggested questions sit under the Ask box: "Could this area flood?", "What are king tides?", "What's protected near here?", "How high do tides get?".
 - **Gap flagged:** the one-line place description isn't from a current evidence source. Options are U8 (a curated, owner-approved blurb labelled as editorial, a sourced description, or omit it in the MVP). Until decided, the mockup sentence is illustrative only.
@@ -111,6 +118,7 @@ Station labels are built from the cited record's own station name and water body
 - Layers: **Flooding** (baseline), **Wetlands**, **Conservation areas**, **Aquatic preserves**, **Shoreline** (proposed, C7 — tagged "Proposed" in the mockups) and **Tide stations**.
 - Each row shows a swatch, a plain name and a source subtitle. Tapping the name opens "What's this?" with the source, date and limitations.
 - Fixed note: "Layers help you look around. What we say about your spot comes from each source's own records."
+- **Descriptive controls.** Map controls carry visible text labels, not icons alone: "Map layers", "Select map center", "Zoom in", "Zoom out" and "My location". Icons, where used, sit next to the text, and the accessible name equals the visible label (WCAG 2.5.3). On mobile, the label may be shortened to "Layers" but the accessible name stays "Map layers" (N32).
 
 ### 0.9 Nature & Wildlife
 
@@ -118,6 +126,13 @@ Station labels are built from the cited record's own station name and water body
   - **"Seen here":** a reported sighting at a place and date. It doesn't mean the species lives there.
   - **"Could live here":** mapped likely habitat. It doesn't mean anyone has seen it there.
 - Live in the proposal: protected places nearby and wetlands (C7/C8).
+- **Actionable nearby-place cards.** Each protected place shows:
+  - its name and managing agency;
+  - the **distance from the selected spot to the area's boundary**, computed server-side from source geometry ("0 km — this spot is inside" when inside);
+  - a **"Show on map"** button that zooms to and highlights the area, with focus moving to the map and an announced name;
+  - a link to the manager's website when the source provides one.
+  
+  A fixed line under the list reads: "Protected doesn't always mean open to the public. Check with the managing agency before visiting."
 - Shown as **Coming later:** wildlife sightings (iNaturalist candidate) and likely rare-species habitat (FNAI Biodiversity Matrix, pending data-use permission). Details are in layer-reuse-feasibility.md §4.
 - Example content is labelled "Example layout — not live data".
 
@@ -153,7 +168,7 @@ Full-screen map with a bottom sheet that has three snap points: A collapsed (≈
 | Top bar | Product name; place search or typed lat/lon; four domain tabs; About/Help | R01, charter domains |
 | Domain tabs | **Water & Weather** (MVP, active), **Nature & Wildlife**, **History & Change**, **Land & Infrastructure** (labelled "later"; visible so the product scope is legible, but they load no data) | Charter; PRD future domains |
 | Layers panel | FEMA flood hazard overlay (toggle, opacity), NOAA station markers, NOAA sea level rise (disabled, "later — D3"), basemap choice, FEMA legend with verbatim codes and plain labels, station legend, an "overlay is orientation only" note, and attribution | R02, R03, R08 |
-| Map | Basemap, FEMA overlay, station markers (circle = observed, triangle = predictions only), selected-point crosshair and coordinate chip, zoom, locate, "Select map centre" control, scale bar, attribution | R01, R02, R08 |
+| Map | Basemap, FEMA overlay, station markers (circle = observed, triangle = predictions only), selected-point crosshair and coordinate chip, zoom, locate, "Select map center" control, scale bar, attribution | R01, R02, R08 |
 | This place | Bound-point header; FEMA card; NOAA card; Ask This Place; answer; source details | R02–R06 |
 
 ## 3. Interaction specification
@@ -163,7 +178,7 @@ Full-screen map with a bottom sheet that has three snap points: A collapsed (≈
 | Input | Behaviour |
 |---|---|
 | Click or tap on the map | Moves the crosshair to the exact clicked coordinate and shows the chip `26.50890, -80.05225` (5 dp display; full precision is kept). On mobile, a toast "Point moved to …" offers Undo for 5 s |
-| Keyboard | Map is focusable. Arrow keys pan by 1/8 of the viewport (Shift: 1/2), `+`/`−` zoom, and **Enter** or the "Select map centre" button selects the fixed centre crosshair. The result is identical to a click |
+| Keyboard | Map is focusable. Arrow keys pan by 1/8 of the viewport (Shift: 1/2), `+`/`−` zoom, and **Enter** or the "Select map center" button selects the fixed centre crosshair. The result is identical to a click |
 | Typed coordinates | Search box accepts `lat, lon`. Rejected with an inline message and no query when outside the Florida envelope ("This point is outside Florida; Florida Explorer covers Florida only") or when the order looks swapped ("Did you mean 26.51, -80.05? Latitude comes first") |
 | Place search | Geocoder suggestions (provider per D1). Choosing one sets the point; the chip shows coordinates, not just the name |
 | Copy | Copies coordinates in `lat, lon` decimal degrees |
