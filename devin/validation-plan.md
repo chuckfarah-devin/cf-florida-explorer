@@ -97,6 +97,7 @@ Assertions per fixture: state code, rendered copy, limitation code, and that no 
 | N17 | Free-text limitation | limitation "this area is safe from flooding" | dropped (not an allow-listed code; prohibited content) | Design |
 | N19 | FEMA cache order | BB-P1 with shared cache: exact query then 15 m buffer, and buffer then exact | exact lookup returns only AE; buffer lookup returns AE + X; state `classified_near_boundary` in both orders, never `ambiguous_overlap` | Design (cache key in source-feasibility.md) |
 | N20 | Identifiers and dates in text | "Station 8722670 … on 2025-10-10", "panel 12099C0793G effective 2024-12-20" citing matching records | accepted: ids/dates checked against id/date fields, no unit or datum required; wrong id (8722671) or date → rejected | Design |
+| N21 | No zone at point, zone in buffer | NZ-1 variant: layer 0 hit, exact layer 28 empty, buffer returns AE; and OC variant: layer 0 empty, buffer returns VE | state stays `in_coverage_no_zone` / `outside_nfhl_coverage`, `nearbyZones` lists the zone, near-boundary warning + `NEAR_MAPPED_ZONE` shown; buffer failure → `BOUNDARY_CHECK_UNAVAILABLE` | Synthetic |
 | N18 | Unsupported unknown | `NO_ICWW_OBS_STATION` when pack has an ICWW water-level station | dropped (basis re-derivation fails) | Design |
 
 ## 6. Run evidence (post-approval)

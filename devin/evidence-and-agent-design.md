@@ -79,7 +79,7 @@ Negative tests (validation-plan.md N13–N16): "Zone X" with facts `{E1, FLD_ZON
 
 These are answer content and get the same controls as findings:
 
-- **Closed code list.** Each entry is a `code` from an allow-list with a fixed, reviewed sentence template and typed `params` (e.g., `STATION_NOT_AT_POINT`, `NO_ICWW_OBS_STATION`, `FEMA_SCREENING_ONLY`, `PRELIMINARY_DATA`, `STALE_RECORD`, `OUT_OF_COVERAGE`, `NO_ZONE_IN_COVERAGE`, `QUESTION_OUTSIDE_EVIDENCE`, `EVENT_WINDOW_UNRESOLVED`). Unknown codes are dropped. No free text.
+- **Closed code list.** Each entry is a `code` from an allow-list with a fixed, reviewed sentence template and typed `params` (e.g., `STATION_NOT_AT_POINT`, `NO_ICWW_OBS_STATION`, `FEMA_SCREENING_ONLY`, `PRELIMINARY_DATA`, `STALE_RECORD`, `OUT_OF_COVERAGE`, `NO_ZONE_IN_COVERAGE`, `NEAR_MAPPED_ZONE`, `BOUNDARY_CHECK_UNAVAILABLE`, `QUESTION_OUTSIDE_EVIDENCE`, `EVENT_WINDOW_UNRESOLVED`). Unknown codes are dropped. No free text.
 - **Basis required.** Each entry cites `basis`: pack records (`E#`) or pack source-status / connector-search entries (`S:*`) that make the statement true. The validator re-derives the condition from the pack (e.g., `NO_ICWW_OBS_STATION` requires the station search record to contain no ICWW water-level station within `radiusKm`; `OUT_OF_COVERAGE` requires layer 0 empty for the point). If the condition does not hold, the entry is dropped.
 - **Param checks.** Every param is type-checked and compared to the pack the same way as finding facts (no numbers, places, dates or station ids not in the basis).
 - **Prohibited content** rules (§4.7) apply; e.g., a limitation may not say "no flood risk".
