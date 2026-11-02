@@ -90,7 +90,7 @@ Citations show a readable label. The evidence ID (`E1`) is kept for audit and ap
 | USFWS NWI (proposed) | "Wetlands inventory" |
 | FDEP aquatic preserves (proposed) | "Florida aquatic preserves" |
 
-Station labels are built from the cited record's own station name and water body, never from a fixed string, so predictions from different stations can't be confused. If one claim cites two records from the same source, they share a single label, with both records listed in the details.
+Station labels are built from the cited record's own station name and water body, never from a fixed string, so predictions from different stations can't be confused. Records are merged under one label only when the label text would be identical, for example the FEMA zone and FIRM panel records ("FEMA flood map"). Records from different stations or features always keep separate labels, so a claim citing Ocean Ridge and Lake Worth Pier predictions shows both.
 
 ### 0.6 Explore this place
 
