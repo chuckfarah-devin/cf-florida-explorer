@@ -144,7 +144,7 @@ Use: station-level context ("the Lake Worth Pier gauge exceeded the NOS minor fl
 
 | Data | Cache key | Fresh TTL | Serve-stale limit | Notes |
 |---|---|---|---|---|
-| FEMA layer 28/3/0 point results | exact coordinate (6 dp) + layer + outFields | 24 h | 7 days, labeled stale with retrieval time | NFHL changes continuously |
+| FEMA layer 28/3/0 point results | service URL + layer + **query mode** (`point_exact` / `point_buffer`) + buffer distance and units (e.g. `15 m`; `0` for exact) + coordinate (6 dp, EPSG:4326) + `spatialRel` + outFields | 24 h | 7 days, labeled stale with retrieval time | NFHL changes continuously. Exact and buffered results for the same point are separate entries and are never substituted for each other; the classification state is computed from the two entries only when both carry the same retrieval batch (or both are re-fetched). Tested in both query orders with a shared cache (validation-plan.md N19) |
 | CO-OPS station metadata/datums/thresholds | station id | 7 days | 30 days | datum epoch shown |
 | Verified historical water levels/HTF (window ended > 45 days ago) | full query string | 30 days | 90 days | `q=v` |
 | Preliminary / recent water levels | full query string | 6 min | none (show "unavailable") | `q=p` labeled preliminary |
@@ -154,4 +154,4 @@ Every cached record keeps its original retrieval timestamp; stale state is compu
 
 ## Failure handling (all connectors)
 
-Per-request timeout 8 s, one retry with jitter for network errors / 5xx / 504 only (FEMA 504s observed), no retry on 4xx or CO-OPS JSON `error`. Distinct states: `ok`, `ok_empty`, `outside_coverage`, `product_not_offered`, `range_error`, `timeout`, `rate_limited`, `upstream_error`, `malformed`, `stale_cache`. A failure is never converted into "no hazard".
+Per-request timeout 8 s, one retry with jitter for network errors / 5xx / 504 only (FEMA 504s observed), no retry on 4xx or CO-OPS JSON `error`. Distinct states: `ok`, `ok_empty` (FEMA: `in_coverage_no_zone`), `outside_coverage` (FEMA: `outside_nfhl_coverage`), `coverage_unknown`, `product_not_offered`, `range_error`, `timeout`, `rate_limited`, `upstream_error`, `malformed`, `stale_cache`. A failure is never converted into "no hazard".
