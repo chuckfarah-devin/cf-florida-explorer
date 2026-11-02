@@ -13,9 +13,16 @@ Status: technical-design delivery for G1. **Implementation NOT authorized.** Dev
 7. **Cost:** ~$0–$5/month infra plus ≈ $0.0014–$0.03 per answer (assumption band). ([cost-security-and-decisions.md](cost-security-and-decisions.md))
 8. **Increments:** I1 map/selection → I2 FEMA → I3 NOAA → I4 Ask This Place → I5 validation; ~10–14 Devin days, each pending approval. ([implementation-proposal.md](implementation-proposal.md))
 
+## Revisions after Chuck's review (round 1)
+
+1. **Datum conversion direction.** source-feasibility.md §S03a now defines `h_B = h_A + (Z_A − Z_B)`. At 8722670 that gives `h_NAVD88 = h_MLLW − 2.51 ft` and `h_MLLW = h_NAVD88 + 2.51 ft`. A live paired reading confirmed it (3.284 ft MLLW vs 0.778 ft NAVD). Tests N11/N11b/N11c cover both directions, the round trip and rejection.
+2. **Citations don't prove statements.** Findings now carry structured `facts` checked for equality against the cited record's values. Claim text is rendered from verified facts by templates, and model prose is audit-only (evidence-and-agent-design.md §4, §4a; D11). Tests N13–N16.
+3. **No unvalidated text.** Unknowns and limitations are now allow-listed codes with typed params and a `basis` the validator re-derives from the pack. Source status and mandatory limitations are server-owned (§4b). Tests N17–N18.
+4. **Separate missing-data fixtures.** IC-1 (in-coverage control), NZ-1 (in coverage, no zone; synthetic because no real point was found), OC-1/OC-2 (outside coverage, checked live) and FL-1 (coverage lookup failed). The fixtures must produce different states, copy and limitation codes (validation-plan.md §4a).
+
 ## Unresolved decisions (details in cost-security-and-decisions.md §6)
 
-D1 map SDK · D2 Briny Breezes point and event window · D3 NOAA overlay vs station-first · D4 hosting · D5 model provider and budget · D6 retention · D7 analyzer reuse permission · D8 thresholds (AC01 1e-5°, 15 m FEMA buffer, 25 km station radius, performance/a11y) · D9 baseline changes C1–C6 · D10 cache TTLs.
+D1 map SDK · D2 Briny Breezes point and event window · D3 NOAA overlay vs station-first · D4 hosting · D5 model provider and budget · D6 retention · D7 analyzer reuse permission · D8 thresholds (AC01 1e-5°, 15 m FEMA buffer, 25 km station radius, performance/a11y) · D9 baseline changes C1–C6 · D10 cache TTLs · D11 answer text from verified facts (templates) vs checked model prose.
 
 ## Items not verified this session
 

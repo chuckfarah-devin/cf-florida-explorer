@@ -46,6 +46,7 @@ Town bounding box from TIGERweb (Checked): lon -80.05680 to -80.04627, lat 26.50
    - one zone at point, >1 zone in buffer → `classified_near_boundary` (show both zones, state map scale 1:6,000 and that boundary placement uncertainty exceeds the buffer);
    - zero at point, layer 0 polygon present → `in_coverage_no_zone` (do not call it "no hazard");
    - zero at point, no layer 0 polygon → `outside_nfhl_coverage`;
+   - zero at point and the layer 0 query failed → `coverage_unknown` (source unavailable; never guessed as either state above). Live coastline check at 26.5089 N: −80.039 is in coverage (layer 0 `12099C`, zone VE); −80.038 and further east have neither layer 0 nor layer 28. Layer 28 ended exactly at the coverage edge, so no real in-coverage/no-zone point was found; validation uses a labelled synthetic fixture until one is (validation-plan.md §4a);
    - >1 zone at exact point (overlap) → `ambiguous_overlap`, list all.
 3. Effective date from layer 3 (`EFF_DATE`) for the panel containing the point; LOMR (layer 1) intersection reported as "a map revision exists here" with its own effective date, never silently merged.
 4. Preserve `FLD_ZONE` and `ZONE_SUBTY` verbatim; plain-language legend is a mapping table reviewed by owner. `STATIC_BFE` is shown only with `V_DATUM` and `LEN_UNIT` (when `LEN_UNIT` is blank, unit is "not stated by source").
@@ -62,7 +63,7 @@ Town bounding box from TIGERweb (Checked): lon -80.05680 to -80.04627, lat 26.50
 | Response fields (`water_level`) | `t` time, `v` value, `s` sigma, `f` flags (4 comma-separated bits), `q` quality (`v` verified, `p` preliminary). Metadata echoes station id/name/lat/lon | Checked |
 | Verification | Documentation: "Data is verified on a monthly basis for the past month". Live `date=latest` returned `q:"p"`; October 2025 returned `q:"v"` | Checked |
 | Time zones | `gmt`, `lst` (local standard), `lst_ldt` (local standard/daylight). Design stores UTC (`gmt`) and renders America/New_York with offset | Checked |
-| Datums | Water levels requested in `MLLW` and `NAVD` both succeeded at 8722670 | Checked |
+| Datums | Water levels requested in `MLLW` and `NAVD` both succeeded at 8722670. Same timestamp 2025-10-10 00:00 GMT: 3.284 ft MLLW vs 0.778 ft NAVD, difference 2.506 ft, matching `h_NAVD88 = h_MLLW − 2.51` (§S03a) | Checked |
 | Missing product | `water_level` at prediction-only station 8722718 → `{"error":{"message":"No data was found. This product may not be offered at this station at the requested time."}}` — distinct "product not offered" state | Checked |
 | Error format | HTTP 200 with JSON `error.message` for parameter/range/no-data errors; must be parsed, not treated as success | Checked |
 | Auth / quota | No key used. No numeric quota published in the page text read | Checked (no auth); quota Unverified |
@@ -75,7 +76,7 @@ Town bounding box from TIGERweb (Checked): lon -80.05680 to -80.04627, lat 26.50
 | Endpoints | `…/mdapi/prod/webapi/stations.json?type=waterlevels` (302 stations nationally), `?type=tidepredictions` (3,502 stations), `stations/{id}.json?expand=details,sensors,products,datums,floodlevels,notices` | Checked |
 | Nearest water-level (observation) stations to BB-P2 | **8722670 Lake Worth Pier, Atlantic Ocean** — 11.7 km N, NWLON; next is 8722956 South Port Everglades at 47.9 km | Checked |
 | Nearest prediction stations | 8722718 Ocean Ridge, ICWW — 2.0 km (type R, harmonic); 8722746 Delray Beach, ICWW — 4.1 km (subordinate S, ref 8723178); 8722706 Boynton Beach, Lake Worth — 4.4 km (S, ref 8723178); 8722670 Lake Worth Pier (ocean) — 11.7 km (R) | Checked |
-| 8722670 datums (ft, station datum STND, epoch 1983–2001, accepted 2017-09-07) | MHHW 33.05, MHW 32.87, MSL 31.53, MLLW 29.99, NAVD88 32.50; GT 3.06 ft. Thus NAVD88 = MLLW + 2.51 ft at this station only | Checked |
+| 8722670 datums (ft, station datum STND, epoch 1983–2001, accepted 2017-09-07) | MHHW 33.05, MHW 32.87, MSL 31.53, MLLW 29.99, NAVD88 32.50; GT 3.06 ft. The NAVD88 datum surface sits 2.51 ft **above** MLLW at this station only, so a water level converts as `h_NAVD88 = h_MLLW − 2.51 ft` and `h_MLLW = h_NAVD88 + 2.51 ft` (see §S03a) | Checked (datums); conversion is derived |
 | 8722670 flood thresholds (ft, STND) | NOS minor 34.82 / moderate 35.77 / major 37.01; NWS minor 34.35 / moderate 34.75 / major 35.55. NOS and NWS thresholds differ and must be labeled by issuer | Checked |
 | 8722670 records | Max 35.331 ft STND on 2022-11-10 18:48; HAT 34.235 | Checked |
 | Station time meta | `timezone EST`, `timezonecorr -5`, `observedst true` | Checked |
@@ -89,6 +90,25 @@ Nearest is not representative. Briny Breezes sits between the Atlantic and the I
 3. Always disclose: station ID, name, water body, distance and bearing from point, product, period, datum, units, time zone, quality status and why it was chosen and what it cannot show.
 4. Briny Breezes proposal: observations from 8722670 (ocean side, 11.7 km, NWLON); predictions from 8722718 Ocean Ridge ICWW (2.0 km) **and** 8722670, shown side by side and labeled as predictions. No observed ICWW record is available nearby; the answer must say so.
 5. Station thresholds (NOS/NWS minor flooding) apply **at the station** only. Never transfer them to the selected point.
+
+
+### S03a — Vertical datum conversion rule (water levels)
+
+All datum elevations from the metadata API are heights on the station datum (STND). For a water level `h` reported relative to datum A, the same water surface relative to datum B is:
+
+```
+h_B = h_A + (Z_A − Z_B)        Z = datum elevation on STND, from the same station and epoch
+```
+
+At 8722670 (feet): `Z_MLLW = 29.99`, `Z_NAVD88 = 32.50`, so `Z_MLLW − Z_NAVD88 = −2.51`.
+
+| From → to | Formula | Example |
+|---|---|---|
+| MLLW → NAVD88 | `h_NAVD88 = h_MLLW − 2.51` | 3.00 ft MLLW → 0.49 ft NAVD88 |
+| NAVD88 → MLLW | `h_MLLW = h_NAVD88 + 2.51` | 0.49 ft NAVD88 → 3.00 ft MLLW |
+| Threshold on STND → MLLW | `t_MLLW = t_STND − 29.99` | NOS minor 34.82 STND → 4.83 ft MLLW; → 2.32 ft NAVD88 |
+
+Rules: offsets are station- and epoch-specific and never reused for another station or the selected point; a conversion is only made when both datums exist in that station's metadata, otherwise the comparison is rejected; units must match before subtraction (no ft/m mixing); every converted value carries original value, original datum, offset, source record and epoch. Preferred approach is to request the data directly in the target datum (`datum=NAVD` succeeded live at 8722670) and use conversion only for cross-checks. Live check: 3.284 ft MLLW − 2.51 = 0.774 ft vs NOAA's 0.778 ft NAVD for the same reading (|Δ| 0.004 ft, rounding of published datums). Validation tests convert in both directions and round-trip (validation-plan.md N11, N11b).
 
 ## NOAA derived high-tide-flooding products (candidate evidence)
 

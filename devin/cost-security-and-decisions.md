@@ -72,3 +72,4 @@ Cost controls: per-IP rate limit on `/ask` (e.g., 20/hour), max question length 
 | D8 | Thresholds | AC01 tolerance, FEMA buffer (15 m), station radius (25 km), performance and a11y targets | Accept validation-plan.md values or amend |
 | D9 | Baseline changes C1–C6 | Accept / reject each | Accept |
 | D10 | Freshness TTLs | source-feasibility.md table | Accept or amend |
+| D11 | How answer text is produced | (a) claim text rendered from verified structured facts by templates; model selects/orders facts and routes the question. (b) model prose checked by an entity/number extractor against facts | (a): only option where every rendered statement is checked against source values (evidence-and-agent-design.md §4a) |
