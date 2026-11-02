@@ -1,0 +1,78 @@
+# Validation plan
+
+Status: future validation design for owner review (G1). Nothing here has been run against an application; no application exists. Implementation NOT authorized.
+
+## 1. Requirement traceability (R01–R08)
+
+| Req | Design decision(s) | Component | Future check |
+|---|---|---|---|
+| R01 | Pointer click + keyboard crosshair "select centre" + typed lat/lon; 5-dp WGS84 display | Point selection, selection store | AC01, AC09 |
+| R02 | Server-side layer-28 exact + 15 m buffer intersect; layer 0 coverage; layer 3 effective date; state machine incl. near-boundary | FEMA connector, map overlay, legend | AC02, AC07, AC11 |
+| R03 | Curated station table; observations 8722670, predictions 8722718 + 8722670 for Briny Breezes; datum/units/tz/quality disclosed; station-first (no NOAA overlay MVP) | NOAA connector, station card | AC03, AC11 |
+| R04 | Evidence-first pack; model without tools; selectionId/locationEcho binding; claim-level citations | Pack builder, composer, validator | AC04, AC05, AC10 |
+| R05 | Closed evidence-class set; source details panel; stale/preliminary labels | Pack builder, source panel | AC02–AC04, AC10, AC11 |
+| R06 | Connector state vocabulary; partial answers; never failure → "no hazard" | Connectors, frontend states | AC06, AC07 |
+| R07 | Fixture records + archived query/response metadata per run | Validation harness | AC08 |
+| R08 | WCAG 2.2 AA target; responsive layouts; attribution | Frontend | AC09 |
+
+## 2. Acceptance criteria → design and check (AC01–AC11)
+
+| AC | Design decision | Proposed check and threshold |
+|---|---|---|
+| AC01 | Displayed coords = selected coords; marker anchored at point | Automated: click at known screen point and typed entry; displayed lat/lon within **1e-5° (~1.1 m)** of input; marker tip within **2 px** of projected point at zoom ≥ 15. Keyboard-only selection passes same checks |
+| AC02 | Exact + buffer intersect; layer 3 date | Compare app evidence for BB-P1 (AE, `12099C_14409`, BFE 8.0 NAVD88, panel 12099C0793G eff. 2024-12-20) and BB-P2 (X 0.2%, `12099C_14190`) to saved authoritative responses; BB-P1 shows near-boundary state at 15 m buffer if confirmed; OFF-1/OUT-1 handled as in AC07 |
+| AC03 | Station card disclosure | Station card shows id, name, water body, distance/bearing, product, period, datum, units, tz, quality; observed vs predicted visually and textually distinct; checklist pass 100% |
+| AC04 | Validator §4 | Review set of ≥ 20 questions across fixtures; **0** material claims without valid citation; reviewer spot-check every claim against record |
+| AC05 | selectionId + abort + echo | Latency-injected A→B and A→B→A switches (100–3,000 ms delays), 50 randomized runs; **0** stale renders |
+| AC06 | Connector states + partial answer | Mocked timeout, HTTP 429, HTTP 504, malformed JSON, CO-OPS `error` JSON for each source; answer names missing source, keeps other citations; **0** "no hazard"/"safe" wording |
+| AC07 | `ok_empty` / `outside_coverage` / `stale_cache` | OFF-1 (layer 28 empty; layer 0 checked), OUT-1 (outside bounds → rejected before query), stale-cache fixture with retrieval date > TTL; three distinct copy variants, none claiming safety |
+| AC08 | Fixtures §4 | Full protocol run with archived evidence; reviewer confirms no station value presented as street flooding |
+| AC09 | Responsive + keyboard | Viewports 360×800, 768×1024, 1366×768, 1920×1080; axe-core **0 serious/critical**; manual keyboard journey (select point, toggle layer, ask, open citation, open source details) with visible focus; 200% zoom and 320 CSS px reflow; contrast ≥ 4.5:1 text / 3:1 UI; screen-reader smoke test (NVDA or VoiceOver) |
+| AC10 | No-tool model + validator | Synthetic injected records; fabricated `E#`; citation to wrong station/date; **100%** rejected; location unchanged |
+| AC11 | Coord validation; datum labelling | Swapped lat/lon (-80.05, 26.51) rejected with message; MLLW vs NAVD88 comparison either rejected or converted using station 8722670 offset (2.51 ft) with conversion shown; feet/metres mismatch rejected |
+
+## 3. Performance targets (proposed for owner approval)
+
+| Metric | Target | Basis |
+|---|---|---|
+| Map interactive (desktop, broadband) | ≤ 3.0 s p75 | Lighthouse desktop |
+| Map interactive (mobile, Lighthouse 4G throttling) | ≤ 5.0 s p75 | Lighthouse mobile |
+| Point → FEMA classification shown | p50 ≤ 2 s, p95 ≤ 6 s (cache miss) | FEMA observed 0.24–7 s, intermittent 504 at ~10 s |
+| Point → NOAA station card | p50 ≤ 2 s, p95 ≤ 5 s | CO-OPS observed ~1 s class |
+| Question → validated answer | p50 ≤ 8 s, p95 ≤ 15 s | evidence cached + one model call |
+| Source timeout | 8 s + 1 retry on 5xx/504 | then partial answer |
+
+## 4. Briny Breezes fixtures (proposed; owner must accept)
+
+Event date: **unresolved.** The user's "last week" is not resolved relative to any date. Until Chuck supplies a fixed window and point, only a labelled historical comparison is possible.
+
+| ID | Point | Window | Purpose | Status |
+|---|---|---|---|---|
+| BB-01 | BB-P1 26.5089022, -80.0522463 (TIGER internal point) | **TBD by Chuck** (user event) | Primary validation of reported event | Blocked on D2 |
+| BB-02 | BB-P1 | 2025-10-04 00:00 to 2025-10-13 00:00 America/New_York (UTC−04:00) = 2025-10-04T04:00Z to 2025-10-13T04:00Z | **Historical comparison only**: Lake Worth Pier HTF daily shows NOS minor-threshold flags on 10-04 and 10-07…10-12 (Checked). Cannot validate the user's event | Proposed |
+| BB-03 | BB-P2 26.5087, -80.0517 | same as BB-02 | Second in-town point with different zone (X 0.2%) | Proposed |
+
+Required per-fixture record (from specs/briny-breezes-validation.md): coordinates + independent check (TIGERweb, a second basemap), fixed timestamps (local + UTC), FEMA query/response/effective date/SR, NOAA candidate stations with rationale (8722670 obs, 8722718/8722670 predictions; no ICWW observation station nearby), datum/units/tz/quality, user testimony stored separately from corroborated records, expected claims and explicitly unsupported conclusions.
+
+Expected claims for BB-02 (illustrative): FEMA zone at point with effective date; Lake Worth Pier (11.7 km N, ocean side) daily maxima and NOS minor flags with datum; predicted high tides at Ocean Ridge ICWW. Explicitly unsupported: "Briny Breezes streets flooded", "king tides caused flooding", any statement about water at the point.
+
+## 5. Negative cases
+
+| ID | Case | Input | Expected | Evidence basis |
+|---|---|---|---|---|
+| N01 | Offshore, no FEMA zone | OFF-1 26.50, -79.90 | layer 28 empty → layer 0 decides `ok_empty` vs `outside_coverage`; no safety claim | Checked layer 28 empty |
+| N02 | Outside Florida bounds | OUT-1 25.00, -78.00 | rejected before query | Checked layer 28 empty |
+| N03 | FEMA boundary | BB-P1 with 15 m buffer | near-boundary state listing AE and X | Checked at 30 m |
+| N04 | Inland / non-coastal point | point to be selected and independently verified at G2 | NOAA: "no suitable tidal station"; FEMA per result | Not yet selected |
+| N05 | NOAA product not offered | water_level at 8722718 | `product_not_offered`, predictions still shown | Checked |
+| N06 | NOAA range exceeded | 6-min request > 31 days | connector splits or reports `range_error` | Checked error text |
+| N07 | Source outage | FEMA 504 / timeout (mock) | partial answer | 504 observed live |
+| N08 | Stale cache | record older than TTL, live fails | stale label + retrieval date | Design |
+| N09 | Rapid switching | A→B→A | AC05 | Design |
+| N10 | Swapped coordinates | (-80.05, 26.51) | rejected | Design |
+| N11 | Datum/units mismatch | MLLW ft vs NAVD88 m | reject or explicit conversion | Station datums Checked |
+| N12 | Injection | synthetic record text | AC10 | Design |
+
+## 6. Run evidence (post-approval)
+
+Each run stores: commit SHA, model id + prompt version, fixture id, request/response metadata (URLs, params, retrieval UTC, status), validator decisions, screenshots for UI checks, pass/fail per AC. Only permitted public-domain snapshots are archived.
