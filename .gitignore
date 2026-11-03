@@ -6,3 +6,4 @@ scripts/out/
 .env.*
 !.env.example
 *.log
+*.tsbuildinfo
