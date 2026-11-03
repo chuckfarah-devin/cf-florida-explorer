@@ -31,6 +31,7 @@ export function LayerPanel({ enabled, status, onToggle, onRetry, onClose }: Prop
                   {l.label}
                 </button>
                 <span className="lsub">{l.sourceLabel}</span>
+                {l.id === 'flood' && enabled[l.id] && <span className="lsub">Zoom in for flood shading and legend</span>}
                 {enabled[l.id] && st !== 'off' && (
                   <span className={`lstatus ${st}`} role={st === 'error' ? 'alert' : 'status'}>
                     {STATUS_TEXT[st]}
@@ -54,7 +55,7 @@ export function LayerPanel({ enabled, status, onToggle, onRetry, onClose }: Prop
           );
         })}
       </ul>
-      <p className="lnote">Layers help you look around. They are shown for reference; Florida Explorer does not make statements about your spot from them yet.</p>
+      <p className="lnote">Layers help you look around. FEMA classification comes from a separate server lookup for your selected point, not from the shading. Nature layers remain display-only.</p>
     </section>
   );
 }

@@ -24,11 +24,12 @@ export async function createMap(
   layers: readonly ReferenceLayerConfig[],
   handlers: { onClick: (p: LatLon) => void; onEnter: () => void; onLayerStatus: (id: string, s: LayerStatus) => void },
 ): Promise<MapHandle> {
-  const [{ default: esriConfig }, { default: EsriMap }, { default: MapView }, { default: Graphic }, { default: GraphicsLayer }, { default: FeatureLayer }, { default: MapImageLayer }, reactiveUtils] =
+  const [{ default: esriConfig }, { default: EsriMap }, { default: MapView }, { default: Graphic }, { default: GraphicsLayer }, { default: FeatureLayer }, { default: MapImageLayer }, reactiveUtils, { default: Legend }] =
     await Promise.all([
       import('@arcgis/core/config.js'), import('@arcgis/core/Map.js'), import('@arcgis/core/views/MapView.js'),
       import('@arcgis/core/Graphic.js'), import('@arcgis/core/layers/GraphicsLayer.js'), import('@arcgis/core/layers/FeatureLayer.js'),
       import('@arcgis/core/layers/MapImageLayer.js'), import('@arcgis/core/core/reactiveUtils.js'),
+      import('@arcgis/core/widgets/Legend.js'),
     ]);
   const apiKey = import.meta.env.VITE_ARCGIS_API_KEY as string | undefined;
   if (apiKey) esriConfig.apiKey = apiKey;
@@ -61,16 +62,31 @@ export async function createMap(
   map.add(marker);
   const view = new MapView({
     container, map, center: [-81.6, 27.8], zoom: 6,
+    aria: { label: MAP_LABEL },
     constraints: { geometry: { type: 'extent', xmin: FLORIDA_BOUNDS.lonMin - 2, ymin: FLORIDA_BOUNDS.latMin - 1.5, xmax: FLORIDA_BOUNDS.lonMax + 2, ymax: FLORIDA_BOUNDS.latMax + 1.5, spatialReference: { wkid: 4326 } }, minZoom: 5 },
   });
   view.ui.remove('zoom');
-  void view.when().then(() => {
-    const surface = container.querySelector<HTMLElement>('.esri-view-surface');
-    surface?.setAttribute('role', 'application');
-    surface?.setAttribute('aria-label', MAP_LABEL);
-  }, () => undefined);
+  let legend: InstanceType<typeof Legend> | null = null;
+  const showFloodLegend = (visible: boolean) => {
+    if (legend) { legend.visible = visible; return; }
+    if (!visible) return;
+    void view.when().then(() => {
+      const layer = layerById.get('flood');
+      if (destroyed || legend || !layer?.visible) return;
+      try {
+        legend = new Legend({ view, layerInfos: [{ layer, title: 'FEMA flood zones · zoom in for shading' }] });
+        view.ui.add(legend, 'bottom-left');
+      } catch { legend = null; } // Optional legend assets must never prevent point selection.
+    }, () => undefined);
+  };
+  // The SDK owns the keyboard surface: its aria option survives localization and surface updates.
   view.on('click', (e) => { const mp = e.mapPoint; if (mp?.latitude != null && mp.longitude != null) handlers.onClick({ lat: mp.latitude, lon: mp.longitude }); });
-  view.on('key-down', (e) => { if (e.key === 'Enter') { e.stopPropagation(); handlers.onEnter(); } });
+  // Enter selects the same center as the explicit button, even before the SDK navigation engine is ready.
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key !== 'Enter' || event.target !== container.querySelector('.esri-view-surface')) return;
+    event.preventDefault(); event.stopPropagation(); handlers.onEnter();
+  };
+  container.addEventListener('keydown', onKeyDown, true);
 
   async function track(id: string) {
     const layer = layerById.get(id)!;
@@ -101,15 +117,19 @@ export async function createMap(
     setLayerVisible(id, visible) {
       const l = layerById.get(id); if (!l) return;
       l.visible = visible;
+      if (id === 'flood') showFloodLegend(visible);
       if (visible) void track(id);
       else generations.set(id, (generations.get(id) ?? 0) + 1);
     },
     retryLayer(id) {
       const old = layerById.get(id); const cfg = layers.find((c) => c.id === id); if (!old || !cfg) return;
-      const fresh = makeLayer(cfg); map.remove(old); old.destroy(); map.add(fresh, map.layers.indexOf(marker)); layerById.set(id, fresh); fresh.visible = true; void track(id);
+      const fresh = makeLayer(cfg); map.remove(old); old.destroy(); map.add(fresh, map.layers.indexOf(marker)); layerById.set(id, fresh); fresh.visible = true;
+      if (id === 'flood' && legend) legend.layerInfos = [{ layer: fresh, title: 'FEMA flood zones · zoom in for shading' }];
+      void track(id);
     },
     destroy() {
       destroyed = true;
+      container.removeEventListener('keydown', onKeyDown, true);
       const list = esriConfig.request.interceptors;
       const i = list?.indexOf(interceptor) ?? -1;
       if (i >= 0) list!.splice(i, 1);
