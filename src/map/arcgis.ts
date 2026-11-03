@@ -33,12 +33,14 @@ export async function createMap(
   const apiKey = import.meta.env.VITE_ARCGIS_API_KEY as string | undefined;
   if (apiKey) esriConfig.apiKey = apiKey;
   const failed = new Set<string>();
+  let destroyed = false;
+  const generations = new Map<string, number>();
   const interceptor = {
     urls: [...new Set(layers.map((l) => l.serviceUrl))],
     error: (err: { details?: unknown }) => {
       const url = (err.details as { url?: string } | undefined)?.url ?? '';
       for (const id of layersForFailedUrl(url, layers)) {
-        if (!layerById.get(id)?.visible) continue;
+        if (destroyed || !layerById.get(id)?.visible) continue;
         failed.add(id);
         handlers.onLayerStatus(id, 'error');
       }
@@ -72,15 +74,19 @@ export async function createMap(
 
   async function track(id: string) {
     const layer = layerById.get(id)!;
+    const generation = (generations.get(id) ?? 0) + 1;
+    generations.set(id, generation);
+    const current = () => !destroyed && layer.visible && layerById.get(id) === layer && generations.get(id) === generation;
     failed.delete(id);
     handlers.onLayerStatus(id, 'loading');
     try {
       await layer.load();
+      if (!current()) return;
       const lv = await view.whenLayerView(layer);
       await reactiveUtils.whenOnce(() => !lv.updating);
-      handlers.onLayerStatus(id, failed.has(id) ? 'error' : 'visible');
+      if (current()) handlers.onLayerStatus(id, failed.has(id) ? 'error' : 'visible');
     } catch {
-      handlers.onLayerStatus(id, 'error');
+      if (current()) handlers.onLayerStatus(id, 'error');
     }
   }
 
@@ -92,12 +98,18 @@ export async function createMap(
     goTo(p) { void view.goTo({ center: [p.lon, p.lat], zoom: Math.max(view.zoom, 14) }).catch(() => undefined); },
     center() { return { lat: view.center.latitude ?? 0, lon: view.center.longitude ?? 0 }; },
     zoom(delta) { void view.goTo({ zoom: view.zoom + delta }).catch(() => undefined); },
-    setLayerVisible(id, visible) { const l = layerById.get(id); if (!l) return; l.visible = visible; if (visible) void track(id); },
+    setLayerVisible(id, visible) {
+      const l = layerById.get(id); if (!l) return;
+      l.visible = visible;
+      if (visible) void track(id);
+      else generations.set(id, (generations.get(id) ?? 0) + 1);
+    },
     retryLayer(id) {
       const old = layerById.get(id); const cfg = layers.find((c) => c.id === id); if (!old || !cfg) return;
-      const fresh = makeLayer(cfg); map.remove(old); map.add(fresh, map.layers.indexOf(marker)); layerById.set(id, fresh); fresh.visible = true; void track(id);
+      const fresh = makeLayer(cfg); map.remove(old); old.destroy(); map.add(fresh, map.layers.indexOf(marker)); layerById.set(id, fresh); fresh.visible = true; void track(id);
     },
     destroy() {
+      destroyed = true;
       const list = esriConfig.request.interceptors;
       const i = list?.indexOf(interceptor) ?? -1;
       if (i >= 0) list!.splice(i, 1);
