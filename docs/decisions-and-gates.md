@@ -8,6 +8,13 @@
 - Approval to request design is not approval to implement. Specification documents remain a proposed baseline for owner review.
 - GitHub access became available and the analyzer was reviewed read-only. Chuck created cf-florida-explorer; GitHub access and write permission verified. No Devin integration found; handoff prepared but not sent.
 
+- 2026-11-03: Chuck approved the revised visual direction (devin/ui-design.md §0, accepted mockups) and **authorized I1 + C7 only**: responsive layout per the mockups, a Florida map, place search, pointer/keyboard/typed-coordinate selection with consistent bounds validation, labelled controls, a pinned Ask This Place area (clearly labelled preview), display-only wetlands / conservation areas / aquatic preserves / shoreline layers with source details and loading/error states, and the project scaffold, CI and tests. FEMA point classification, NOAA, nature lookups, model integration and deployment remain pending separate approval. Stop for review before I2 or any deployment.
+- D1: ArcGIS Maps SDK for JavaScript, with a dedicated, restricted Florida Explorer API key whose value is never committed (devin/arcgis-licensing.md).
+- D11: factual answers are rendered from validated structured facts using reviewed templates.
+- U8: unsourced place descriptions are omitted for now.
+- NZ-1: the synthetic "inside coverage, no zone" fixture is accepted for deterministic branch testing. It is not claimed to be a verified real location.
+- D8 (partial): 15 m is accepted as our provisional nearby-zone check radius. It is not FEMA accuracy. The other D8 thresholds remain proposed.
+
 ## Gates
 
 | Gate | Evidence required | Status |
