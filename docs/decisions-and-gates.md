@@ -14,6 +14,7 @@
 - U8: unsourced place descriptions are omitted for now.
 - NZ-1: the synthetic "inside coverage, no zone" fixture is accepted for deterministic branch testing. It is not claimed to be a verified real location.
 - D8 (partial): 15 m is accepted as our provisional nearby-zone check radius. It is not FEMA accuracy. The other D8 thresholds remain proposed.
+- D2 (partial): BB-01 event window confirmed as 25–29 Oct 2026, America/New_York, based on Chuck's firsthand observation (including water entering some homes). His outline is an approximate recollection, not a surveyed flood boundary. The exact validation point is still to be selected. Two published reports are candidate corroboration, linked only; no photo-reproduction permission. Government classifications, mapped wetlands, station measurements, published reports and owner observations stay distinct, and wetlands shading is never presented as the event's flood extent (devin/bb01-event-record.md).
 
 ## Gates
 
@@ -27,7 +28,7 @@
 ## Open decisions
 
 1. Repository confirmed: chuckfarah-devin/cf-florida-explorer, public, created by Chuck.
-2. Briny Breezes exact point and fixed event window; local corroboration and suitable NOAA station.
+2. Briny Breezes exact validation point and suitable NOAA station (event window confirmed; candidate corroboration recorded).
 3. ArcGIS licensing/SDK; NOAA spatial overlay selection versus station-first MVP presentation.
 4. Hosting, architecture, model/provider, budget, retention, freshness, latency and accessibility targets: Devin proposes; Chuck approves at G1/G2.
 5. Confirm reuse choices and complete deeper analyzer licensing/dependency review.

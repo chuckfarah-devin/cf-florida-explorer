@@ -27,7 +27,7 @@ export const REFERENCE_LAYERS: readonly ReferenceLayerConfig[] = [
     swatch: '#6fb7a3',
     sourcePage: 'https://www.fws.gov/program/national-wetlands-inventory',
     about: 'Mapped wetlands and deepwater habitats. Mapping dates vary by area.',
-    limitation: 'Screening map only. Not a regulatory wetland delineation or jurisdictional determination.',
+    limitation: 'Screening map only. Not a regulatory wetland delineation, and not where water went in any flood event.',
   },
   {
     id: 'conservation',
