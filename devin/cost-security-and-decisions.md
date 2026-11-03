@@ -63,7 +63,7 @@ Cost controls: per-IP rate limit on `/ask` (e.g., 20/hour), max question length 
 | ID | Decision | Options | Recommendation |
 |---|---|---|---|
 | D1 | Map rendering | M1 MapLibre + Esri plugin; M2 ArcGIS Maps SDK 5.x | M2 (M1 if open license preferred) |
-| D2 | Briny Breezes fixture | Exact point; fixed event window (dates/times, tz); any local corroboration | Provide window; accept BB-02 as labelled comparison meanwhile |
+| D2 | Briny Breezes fixture | Exact point (open). Window **confirmed**: 25–29 Oct 2026, America/New_York. Candidate corroboration recorded in bb01-event-record.md | Select the point within the outlined area |
 | D3 | NOAA presentation | Station-first; add SLR/HTF overlay | Station-first MVP; overlay later |
 | D4 | Hosting | D4-a…d (technical-design.md §6) | D4-a or D4-b on existing accounts |
 | D5 | Model provider/budget | Any provider with structured output and no-training option | Choose provider; set monthly cap |

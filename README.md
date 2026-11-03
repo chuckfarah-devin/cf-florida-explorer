@@ -20,3 +20,13 @@ Status as of 2026-11-02: documentation baseline prepared for review; technical d
 
 Only docs/, specs/, devin/, and data/ are needed at this stage. This folder is already distinct; another nested project folder is unnecessary.
 
+
+## Development (I1)
+
+Requires Node 24.15+. Copy `.env.example` to `.env.local` and set `VITE_ARCGIS_API_KEY` to the dedicated, referrer-restricted Florida Explorer key (never commit it). Without a key the app uses an OpenStreetMap development basemap and place search is unavailable.
+
+```
+npm ci
+npm run dev        # local dev server
+npm run lint && npm run typecheck && npm test && npm run build
+```
