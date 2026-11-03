@@ -11,8 +11,10 @@ for (const [name, viewport] of [['desktop-1366x768', { width: 1366, height: 768 
   const page = await browser.newPage({ viewport });
   await page.goto(base);
   await page.waitForTimeout(4000);
-  await page.getByRole('searchbox').fill('26.50890, -80.05225');
+  const query = process.env.SEARCH_QUERY ?? '26.50890, -80.05225';
+  await page.getByRole('searchbox').fill(query);
   await page.getByRole('searchbox').press('Enter');
+  if (!/^\s*-?\d/.test(query)) await page.getByRole('list', { name: 'Search results' }).getByRole('button').first().click();
   if (viewport.width >= 1024) {
     await page.getByRole('switch', { name: 'Show Conservation areas' }).check();
     await page.getByRole('switch', { name: 'Show Wetlands' }).check();
