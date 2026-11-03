@@ -7,3 +7,5 @@ scripts/out/
 !.env.example
 *.log
 *.tsbuildinfo
+test-results/
+playwright-report/

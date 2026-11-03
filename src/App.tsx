@@ -75,7 +75,7 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
       } />
       <main className="body">
         <div className="mapwrap">
-          <div ref={mapDiv} className="map" tabIndex={0} aria-label="Map of Florida. Use arrow keys to pan and Enter to select the map center." role="application" />
+          <div ref={mapDiv} className="map" />
           {mapError && <p className="map-error" role="alert">{mapError}</p>}
           {devBasemap && <p className="dev-banner">Development basemap (OpenStreetMap). The ArcGIS key isn't configured.</p>}
           {sel.rejection && (

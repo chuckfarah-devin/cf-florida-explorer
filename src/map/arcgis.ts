@@ -2,6 +2,7 @@ import type { LatLon } from '../config/bounds';
 import { FLORIDA_BOUNDS } from '../config/bounds';
 import type { ReferenceLayerConfig, LayerStatus } from '../config/layers';
 import type { PlaceCandidate } from '../components/SearchBox';
+import { layersForFailedUrl } from './layerErrors';
 
 export interface MapHandle {
   setMarker: (p: LatLon | null) => void;
@@ -12,6 +13,8 @@ export interface MapHandle {
   retryLayer: (id: string) => void;
   destroy: () => void;
 }
+
+export const MAP_LABEL = 'Map of Florida. Use arrow keys to pan and Enter to select the map center.';
 
 const GEOCODE_URL = 'https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer';
 
@@ -29,6 +32,19 @@ export async function createMap(
     ]);
   const apiKey = import.meta.env.VITE_ARCGIS_API_KEY as string | undefined;
   if (apiKey) esriConfig.apiKey = apiKey;
+  const failed = new Set<string>();
+  const interceptor = {
+    urls: [...new Set(layers.map((l) => l.serviceUrl))],
+    error: (err: { details?: unknown }) => {
+      const url = (err.details as { url?: string } | undefined)?.url ?? '';
+      for (const id of layersForFailedUrl(url, layers)) {
+        if (!layerById.get(id)?.visible) continue;
+        failed.add(id);
+        handlers.onLayerStatus(id, 'error');
+      }
+    },
+  };
+  esriConfig.request.interceptors?.push(interceptor);
   const marker = new GraphicsLayer({ title: 'Selected place', listMode: 'hide' });
   const map = new EsriMap({ basemap: apiKey ? 'arcgis/light-gray' : 'osm' });
   const layerById = new Map<string, InstanceType<typeof FeatureLayer> | InstanceType<typeof MapImageLayer>>();
@@ -46,17 +62,23 @@ export async function createMap(
     constraints: { geometry: { type: 'extent', xmin: FLORIDA_BOUNDS.lonMin - 2, ymin: FLORIDA_BOUNDS.latMin - 1.5, xmax: FLORIDA_BOUNDS.lonMax + 2, ymax: FLORIDA_BOUNDS.latMax + 1.5, spatialReference: { wkid: 4326 } }, minZoom: 5 },
   });
   view.ui.remove('zoom');
+  void view.when().then(() => {
+    const surface = container.querySelector<HTMLElement>('.esri-view-surface');
+    surface?.setAttribute('role', 'application');
+    surface?.setAttribute('aria-label', MAP_LABEL);
+  }, () => undefined);
   view.on('click', (e) => { const mp = e.mapPoint; if (mp?.latitude != null && mp.longitude != null) handlers.onClick({ lat: mp.latitude, lon: mp.longitude }); });
   view.on('key-down', (e) => { if (e.key === 'Enter') { e.stopPropagation(); handlers.onEnter(); } });
 
   async function track(id: string) {
     const layer = layerById.get(id)!;
+    failed.delete(id);
     handlers.onLayerStatus(id, 'loading');
     try {
       await layer.load();
       const lv = await view.whenLayerView(layer);
       await reactiveUtils.whenOnce(() => !lv.updating);
-      handlers.onLayerStatus(id, 'visible');
+      handlers.onLayerStatus(id, failed.has(id) ? 'error' : 'visible');
     } catch {
       handlers.onLayerStatus(id, 'error');
     }
@@ -75,7 +97,12 @@ export async function createMap(
       const old = layerById.get(id); const cfg = layers.find((c) => c.id === id); if (!old || !cfg) return;
       const fresh = makeLayer(cfg); map.remove(old); map.add(fresh, map.layers.indexOf(marker)); layerById.set(id, fresh); fresh.visible = true; void track(id);
     },
-    destroy() { view.destroy(); },
+    destroy() {
+      const list = esriConfig.request.interceptors;
+      const i = list?.indexOf(interceptor) ?? -1;
+      if (i >= 0) list!.splice(i, 1);
+      view.destroy();
+    },
   };
 }
 

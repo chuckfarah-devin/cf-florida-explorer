@@ -14,7 +14,7 @@ export function AskPreview({ placeLabel }: { placeLabel: string | null }) {
         <button type="submit" className="btn" disabled>Ask</button>
       </form>
       <p id="ask-note" className="ask-note">Answers from source records arrive in a later step. Nothing is answered yet.</p>
-      <div className="qa" aria-label="Example questions">
+      <div className="qa" role="group" aria-label="Example questions">
         {SUGGESTIONS.map((q) => <span key={q} className="chip q" aria-disabled="true">{q}</span>)}
       </div>
     </section>

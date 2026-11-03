@@ -1,4 +1,4 @@
-:root{--ink:#1c2b33;--ink2:#4a5a63;--ink3:#73828a;--line:#dfe5e3;--sand:#f7f3ec;--teal:#0d6b78;--teal-d:#0a5560;--teal-l:#e3f1f2;--r:14px;--shadow:0 6px 24px rgba(20,40,50,.12),0 1px 3px rgba(20,40,50,.08);
+:root{--ink:#1c2b33;--ink2:#4a5a63;--ink3:#5c6a71;--line:#dfe5e3;--sand:#f7f3ec;--teal:#0d6b78;--teal-d:#0a5560;--teal-l:#e3f1f2;--r:14px;--shadow:0 6px 24px rgba(20,40,50,.12),0 1px 3px rgba(20,40,50,.08);
 font-family:"Source Sans 3","Liberation Sans",Helvetica,Arial,sans-serif;color:var(--ink);background:var(--sand)}
 *{box-sizing:border-box}body,h1,h2,h3,p,ul{margin:0}ul{padding:0;list-style:none}button{font:inherit;cursor:pointer}
 html,body,#root{height:100%}
@@ -79,3 +79,5 @@ h1{font-size:30px;line-height:1.15;margin:4px 0 6px}
   .dev-banner{bottom:auto;top:8px;right:8px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.map .esri-view-surface:focus-visible{outline:3px solid var(--teal)!important;outline-offset:-3px}
