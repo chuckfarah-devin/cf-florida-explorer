@@ -74,10 +74,11 @@ h1{font-size:30px;line-height:1.15;margin:4px 0 6px}
   .body{flex-direction:column}.mapwrap{flex:1;min-height:45vh}
   .panel{width:auto;border-left:0;border-top:1px solid var(--line);border-radius:20px 20px 0 0;max-height:52vh;box-shadow:0 -6px 24px rgba(20,40,50,.18)}
   .pscroll{padding:14px 18px}h1{font-size:24px}
-  .layers-float{left:8px;right:8px;width:auto;top:8px}.mapctl{top:auto;bottom:12px;right:8px}.mapctl .ctl:not(.ctl-layers){display:none}
+  .layers-float{left:8px;right:8px;width:auto;top:8px;max-height:calc(100% - 70px);overflow-y:auto;overscroll-behavior:contain;border-radius:14px}.mapctl{top:auto;bottom:12px;right:8px}.mapctl .ctl:not(.ctl-layers){display:none}
   .selcenter{bottom:12px;left:8px;transform:none}
   .dev-banner{bottom:auto;top:8px;right:8px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 .map .esri-view-surface:focus-visible{outline:3px solid var(--teal)!important;outline-offset:-3px}
+.flood-card h2{font-size:18px;margin-bottom:8px}.flood-card p{line-height:1.5;margin:8px 0}.flood-card{overflow-wrap:anywhere}.flood-limits{font-size:13px;color:var(--ink2)}.flood-notice{background:#fff4d8;border:1px solid #b48a33;padding:8px;border-radius:8px;color:#61481b;font-size:14px}.flood-details{margin-top:12px;font-size:13px}.flood-details summary{cursor:pointer;font-weight:700;color:var(--teal-d);min-height:32px}.flood-record{border-top:1px solid var(--line);margin-top:8px}.flood-details a{color:var(--teal-d)}
