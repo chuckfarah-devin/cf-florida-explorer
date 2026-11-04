@@ -23,6 +23,27 @@ const response = (id = 1): TideResponse => ({
 });
 
 describe('NOAA tide card', () => {
+  it('shares only the applied dates and datum atomically, never unsubmitted edits or retries', async () => {
+    const onWindow = vi.fn();
+    const lookup = vi.fn(async () => response());
+    const user = userEvent.setup();
+    render(<TideCard selection={selection} lookup={lookup} onWindow={onWindow} />);
+    await screen.findByRole('heading', { name: 'Lake Worth Pier' });
+    expect(onWindow).toHaveBeenCalledExactlyOnceWith({ startDate: '2026-10-25', endDate: '2026-10-29', datum: 'MLLW' });
+    await user.clear(screen.getByLabelText('Start date'));
+    await user.type(screen.getByLabelText('Start date'), '2026-10-26');
+    await user.clear(screen.getByLabelText('End date (included)'));
+    await user.type(screen.getByLabelText('End date (included)'), '2026-10-30');
+    await user.selectOptions(screen.getByLabelText('Height reference'), 'NAVD');
+    expect(onWindow).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByRole('button', { name: 'Compare tides' }));
+    expect(onWindow).toHaveBeenCalledTimes(2);
+    expect(onWindow).toHaveBeenLastCalledWith({ startDate: '2026-10-26', endDate: '2026-10-30', datum: 'NAVD' });
+    await screen.findByRole('button', { name: 'Retry NOAA lookup' });
+    await user.click(screen.getByRole('button', { name: 'Retry NOAA lookup' }));
+    expect(onWindow).toHaveBeenCalledTimes(2);
+  });
+
   it('separates measured maxima, predictions, quality, flags and local references', async () => {
     render(<TideCard selection={selection} lookup={vi.fn(async () => response())} />);
     expect(await screen.findByRole('heading', { name: 'Lake Worth Pier' })).toBeVisible();

@@ -1,5 +1,9 @@
 # Decisions and approval gates
 
+## 2026-11-04 — I4 template-first authorization
+
+Chuck approved the recommended next step (“i agree....lets do it”): Ask This Place with checked FEMA/NOAA templates and readable citations, before nature. No model/provider is needed or selected. Applied dates/reference bind the answer; drafts do not. See [I4 record](i4-checked-answers.md). Merges, deployment, broader model routing and nature facts remain separately gated.
+
 ## 2026-11-04 — I3 authorization
 
 Chuck said “ok lets do it” to the next NOAA tide-comparison increment after reviewing live I2 FEMA information. I3 metadata, observations/predictions, daily HTF source states, local API, station markers, UI and checks are authorized. Working point:26.50844824511624,−80.05460169017356; default period October25–29,2026 America/New_York. Station scope/radius remains provisional and disclosed; periods are conservatively capped at30 inclusive local dates. See [I3 record](i3-noaa-implementation.md). AI answers, nature fact lookups, merging and deployment remain separately gated. Earlier status tables below are historical and do not revoke later bounded authorizations.

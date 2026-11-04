@@ -46,13 +46,16 @@ function ProductTable({ product, datum }: { product: TideProduct; datum: TideReq
   </>;
 }
 
-export function TideCard({ selection, lookup = fetchTides, onStations }: { selection: Selection; lookup?: typeof fetchTides; onStations?: (stations: TideStationMarker[]) => void }) {
+export function TideCard({ selection, lookup = fetchTides, onStations, onWindow }: { selection: Selection; lookup?: typeof fetchTides; onStations?: (stations: TideStationMarker[]) => void; onWindow?: (window: TideRequest) => void }) {
   const id = useId();
   const [draft, setDraft] = useState<TideRequest>(initialWindow);
   const [request, setRequest] = useState({ window: initialWindow, attempt: 0 });
   const [error, setError] = useState('');
   const [response, setResponse] = useState<{ key: string; result?: TideResponse; failed?: boolean } | null>(null);
   const key = `${selection.selectionId}/${selection.point.lat}/${selection.point.lon}/${request.window.startDate}/${request.window.endDate}/${request.window.datum}/${request.attempt}`;
+  useEffect(() => {
+    onWindow?.(request.window);
+  }, [request.window, onWindow]);
   useEffect(() => {
     const controller = new AbortController(); let current = true;
     lookup(selection, request.window, controller.signal).then(

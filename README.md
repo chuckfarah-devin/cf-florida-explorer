@@ -5,7 +5,7 @@ Select a place. Explore its story. Follow the evidence.
 Independent Florida Explorer documentation workspace.
 Repository: [cf-florida-explorer](https://github.com/chuckfarah-devin/cf-florida-explorer), separate from `cf-ai-infrastructure-analyzer`.
 
-Status as of 2026-11-04: I1/C7 and I2 are proposed in PRs #2/#3. Chuck authorized I3, now adding bounded NOAA station comparisons; see [I3 record](docs/i3-noaa-implementation.md). AI answers, nature fact lookups, merging and deployment require separate approval.
+Status as of 2026-11-04: I1/C7 and I2 are proposed in PRs #2/#3. I3 adds bounded NOAA station comparisons. Chuck authorized template-first Ask This Place; see [I4 record](docs/i4-checked-answers.md). Model routing, nature fact lookups, merging and deployment require separate approval.
 
 ## Reading order
 
@@ -21,7 +21,7 @@ Status as of 2026-11-04: I1/C7 and I2 are proposed in PRs #2/#3. Chuck authorize
 The documentation baseline remains under docs/, specs/, devin/, and data/. Application code is under src/; the portable local API is under server/.
 
 
-## Development (I1–I3)
+## Development (I1–I4 template-first)
 
 Requires Node 24.15+. Copy `.env.example` to `.env.local` and set `VITE_ARCGIS_API_KEY` to the dedicated, referrer-restricted Florida Explorer key (never commit it). Without a key the app uses an OpenStreetMap development basemap and place search is unavailable.
 
@@ -31,8 +31,9 @@ npm run dev        # local dev server
 npm run lint && npm run typecheck && npm test && npm run build
 ```
 
-The Vite development and preview servers serve `/api/fema` and `/api/noaa` locally. For the built frontend plus local API, run `npm run build` then `npm start` (default http://localhost:4173; `PORT` changes the port). Use localhost if that is the hostname permitted by your ArcGIS key. An HTTPS reverse proxy must explicitly configure `PUBLIC_ORIGIN` to its exact frontend origin; forwarded protocol headers are not trusted. No hosting provider or deployment is selected.
+The Vite development and preview servers serve `/api/fema`, `/api/noaa` and `/api/ask` locally. For the built frontend plus local API, run `npm run build` then `npm start` (default http://localhost:4173; `PORT` changes the port). Use localhost if that is the hostname permitted by your ArcGIS key. An HTTPS reverse proxy must explicitly configure `PUBLIC_ORIGIN` to its exact frontend origin; forwarded protocol headers are not trusted. No hosting provider or deployment is selected.
 
 FEMA requests need no API key. A static-files-only server cannot run the API: it must use the portable handler or the provided local Node server. Server runtime is Node 24.15+ and uses native TypeScript stripping; no production server dependency is added.
 
 `npm run test:a11y` checks the built frontend with synthetic FEMA responses and blocked upstream map/data services. `node scripts/fema-smoke.mjs` separately probes public FEMA services at the two documented Briny Breezes points and writes ignored output under scripts/out/. Synthetic tests and screenshots do not validate the October 2026 flooding event.
+
