@@ -29,6 +29,12 @@ test.beforeEach(async ({ page }) => {
     await route.fulfill({ path: asset, ...(asset.endsWith('.wasm') ? { contentType: 'application/wasm' } : {}) });
   });
   await page.route('**/api/fema', (route) => route.fulfill({ json: fixture(route.request().postDataJSON()) }));
+  await page.route('**/api/ask', (route) => {
+    const r = route.request().postDataJSON();
+    return route.fulfill({ json: { selectionId: r.selectionId, point: { lat: r.lat, lon: r.lon }, window: { startDate: r.startDate, endDate: r.endDate, datum: r.datum }, question: r.question, packId: 'synthetic-ask-pack', createdAtUtc: '2026-11-04T18:00:00Z', mode: 'template', intent: 'flood', supported: true,
+      findings: [{ id: 'F1', text: 'Synthetic FEMA fixture: this selected spot is mapped in Zone AE.', evidenceClass: 'regulatory_classification', citations: ['E1'] }], limitations: ['Mapped classification does not establish actual street flooding.'], statuses: [{ source: 'FEMA flood map', state: 'classified' }], sources: [{ ref: 'E1', label: 'FEMA flood map', kind: 'regulatory_classification', url: 'https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?f=json', retrievedAtUtc: '2026-11-04T18:00:00Z' }],
+    } });
+  });
   await page.route('**/api/noaa', (route) => {
     const r = route.request().postDataJSON();
     return route.fulfill({ json: {
@@ -57,6 +63,33 @@ async function axe(page: Page) {
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze();
   expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
 }
+
+test('Ask returns cited evidence, focuses the answer and clears it on a new selected point', async ({ page }) => {
+  await selectTyped(page);
+  await page.getByRole('button', { name: 'What does FEMA say about flooding here?', exact: true }).click();
+  const answer = page.getByRole('region', { name: 'Answer for this place' });
+  await expect(answer).toContainText('Synthetic FEMA fixture');
+  await expect(answer.getByRole('heading', { name: 'About this place' })).toBeFocused();
+  await expect(answer.getByRole('link', { name: 'FEMA flood map ↗', exact: true }).first()).toHaveAttribute('href', /hazards.fema.gov/);
+  await axe(page);
+  await page.getByRole('searchbox').fill('26.5090, -80.0522'); await page.getByRole('searchbox').press('Enter');
+  await expect(answer).toHaveCount(0);
+});
+
+test('mobile Ask keeps a usable answer area and pinned composer', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); await selectTyped(page);
+  await page.getByRole('textbox', { name: 'Question', exact: true }).fill('What does FEMA map here?');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  const answer = page.getByRole('region', { name: 'Answer for this place' });
+  await expect(answer).toContainText('Synthetic FEMA fixture');
+  await expect(page.locator('.askfoot input')).toBeInViewport();
+  expect((await page.locator('.pscroll').boundingBox())!.height).toBeGreaterThan(300);
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(page.getByRole('banner')).toBeInViewport();
+  await axe(page);
+  await page.getByRole('button', { name: '← Back to place' }).click();
+  await expect(answer).toHaveCount(0);
+});
 
 test('desktop start screen has no WCAG A/AA violations', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });

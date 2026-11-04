@@ -59,12 +59,12 @@ describe('App (I1)', () => {
     }
   });
 
-  it('shows Ask This Place as a labelled, disabled preview with no answers (N31 component level)', () => {
+  it('keeps Ask This Place disabled until a point is selected', () => {
     render(<App mapApi={fakeApi().api} />);
     const ask = screen.getByRole('region', { name: /ask this place/i });
-    expect(within(ask).getByText('Preview')).toBeInTheDocument();
+    expect(within(ask).getByText('Source-based answers')).toBeInTheDocument();
     expect(within(ask).getByRole('textbox', { name: 'Question' })).toBeDisabled();
-    expect(within(ask).getByText(/Nothing is answered yet/)).toBeInTheDocument();
+    expect(within(ask).getByText(/Select a Florida place/)).toBeInTheDocument();
   });
 
   it('selects a typed coordinate and rejects an out-of-bounds one without moving (N22)', async () => {

@@ -5,9 +5,10 @@ import type { DomainId } from './Header';
 import { FloodCard } from './FloodCard';
 import { TideCard } from './TideCard';
 import type { TideStationMarker } from '../map/noaaStations';
+import type { TideRequest } from '../noaa/types';
 
 /** Shows only what is known in I1: the selected spot. Facts arrive in later, separately approved increments. */
-export function PlacePanel({ selection, domain, onStations }: { selection: Selection | null; domain: DomainId; onStations?: (stations: TideStationMarker[]) => void }) {
+export function PlacePanel({ selection, domain, onStations, onWindow }: { selection: Selection | null; domain: DomainId; onStations?: (stations: TideStationMarker[]) => void; onWindow?: (window: TideRequest) => void }) {
   const [showExact, setShowExact] = useState(false);
   if (!selection) {
     return (
@@ -28,7 +29,7 @@ export function PlacePanel({ selection, domain, onStations }: { selection: Selec
       </button>
       {showExact && <p className="coords">{formatLatLon(selection.point)}</p>}
       {domain === 'water' && <FloodCard selection={selection} />}
-      {domain === 'water' && <TideCard selection={selection} onStations={onStations} />}
+      {domain === 'water' && <TideCard selection={selection} onStations={onStations} onWindow={onWindow} />}
       {domain === 'nature' && <div className="pending card">
         <h3>Nature nearby</h3>
         <p className="muted">

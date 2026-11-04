@@ -4,12 +4,14 @@ import { SearchBox, type PlaceCandidate } from './components/SearchBox';
 import { LayerPanel } from './components/LayerPanel';
 import { MapControls } from './components/MapControls';
 import { PlacePanel } from './components/PlacePanel';
-import { AskPreview } from './components/AskPreview';
+import { AskThisPlace, askScopeKey, type AskUiState } from './components/AskThisPlace';
+import { AskAnswer } from './components/AskAnswer';
 import { REFERENCE_LAYERS, type LayerStatus, type ReferenceLayerId } from './config/layers';
 import { initialSelection, selectionReducer } from './state/selection';
 import { checkPoint, type LatLon } from './config/bounds';
 import type { MapHandle } from './map/arcgis';
 import type { TideStationMarker } from './map/noaaStations';
+import type { TideRequest } from './noaa/types';
 
 type Rec<T> = Record<ReferenceLayerId, T>;
 const allOff = Object.fromEntries(REFERENCE_LAYERS.map((l) => [l.id, false])) as Rec<boolean>;
@@ -28,6 +30,12 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
   const [status, setStatus] = useState<Rec<LayerStatus>>(allStatusOff);
   const [layersOpen, setLayersOpen] = useState(() => typeof window === 'undefined' || window.innerWidth >= 1024);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [askWindow, setAskWindow] = useState<TideRequest>({ startDate: '2026-10-25', endDate: '2026-10-29', datum: 'MLLW' });
+  const [askState, setAskState] = useState<AskUiState | null>(null);
+  const applyAskWindow = useCallback((window: TideRequest) => {
+    setAskWindow((old) => old.startDate === window.startDate && old.endDate === window.endDate && old.datum === window.datum ? old : window);
+    setAskState(null);
+  }, []);
   const mapDiv = useRef<HTMLDivElement>(null);
   const handle = useRef<MapHandle | null>(null);
   const api = useRef<MapApi | null>(null);
@@ -39,11 +47,11 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
   }, []);
 
   const select = useCallback((point: LatLon, source: 'pointer' | 'keyboard' | 'typed' | 'search', placeName?: string) => {
-    if (checkPoint(point).ok) showTideStations([]);
+    if (checkPoint(point).ok) { showTideStations([]); setAskState(null); }
     dispatch({ type: 'select', point, source, placeName });
   }, [showTideStations]);
   const changeDomain = (next: DomainId) => {
-    if (next !== domain) showTideStations([]);
+    if (next !== domain) { showTideStations([]); setAskState(null); }
     setDomain(next);
   };
 
@@ -82,11 +90,12 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
     handle.current?.setLayerVisible(id, next);
   };
 
-  const placeLabel = sel.current ? sel.current.placeName ?? 'this spot' : null;
+  const scopeKey = askScopeKey(sel.current, askWindow, domain);
+  const activeAnswer = askState?.scopeKey === scopeKey && domain === 'water' ? askState : null;
   const devBasemap = !import.meta.env.VITE_ARCGIS_API_KEY;
 
   return (
-    <div className="app">
+    <div className={`app${activeAnswer ? ' has-answer' : ''}`}>
       <Header domain={domain} onDomain={changeDomain} search={
         <SearchBox
           onCoordinates={(p) => select(p, 'typed')}
@@ -114,8 +123,8 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
             onSelectCenter={() => handle.current && select(handle.current.center(), 'keyboard')} />
         </div>
         <aside className="panel" aria-label="This place">
-          <div className="pscroll"><PlacePanel selection={sel.current} domain={domain} onStations={showTideStations} /></div>
-          <AskPreview placeLabel={placeLabel} />
+          <div className="pscroll"><AskAnswer state={activeAnswer} onClose={() => setAskState(null)} /><PlacePanel selection={sel.current} domain={domain} onStations={showTideStations} onWindow={applyAskWindow} /></div>
+          <AskThisPlace key={scopeKey} selection={sel.current} window={askWindow} domain={domain} scopeKey={scopeKey} onState={setAskState} />
         </aside>
       </main>
     </div>
