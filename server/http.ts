@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { handleFemaRequest } from './api.ts';
+import { handleNoaaRequest } from './noaa-api.ts';
 
 /** Shared bridge for Vite development and the optional local production server. */
 export async function serveFema(req: IncomingMessage, res: ServerResponse, publicOrigin = process.env.PUBLIC_ORIGIN) {
@@ -12,7 +13,7 @@ export async function serveFema(req: IncomingMessage, res: ServerResponse, publi
   // HTTPS reverse proxies must configure PUBLIC_ORIGIN. Never trust forwarded protocol headers.
   const origin = publicOrigin ? new URL(publicOrigin).origin : `http://${req.headers.host ?? 'localhost'}`;
   const request = new Request(new URL(req.url ?? '/', origin), { method: req.method, headers: Object.fromEntries(Object.entries(req.headers).filter(([, v]) => typeof v === 'string')) as Record<string, string>, ...(req.method === 'POST' ? { body: Buffer.concat(chunks) } : {}) });
-  const response = await handleFemaRequest(request);
+  const response = await (new URL(request.url).pathname === '/api/noaa' ? handleNoaaRequest : handleFemaRequest)(request);
   res.writeHead(response.status, Object.fromEntries(response.headers));
   res.end(await response.text());
 }

@@ -1,5 +1,9 @@
 # Decisions and approval gates
 
+## 2026-11-04 — I3 authorization
+
+Chuck said “ok lets do it” to the next NOAA tide-comparison increment after reviewing live I2 FEMA information. I3 metadata, observations/predictions, daily HTF source states, local API, station markers, UI and checks are authorized. Working point:26.50844824511624,−80.05460169017356; default period October25–29,2026 America/New_York. Station scope/radius remains provisional and disclosed; periods are conservatively capped at30 inclusive local dates. See [I3 record](i3-noaa-implementation.md). AI answers, nature fact lookups, merging and deployment remain separately gated. Earlier status tables below are historical and do not revoke later bounded authorizations.
+
 ## 2026-11-03 — I2 authorization
 
 Chuck explicitly instructed “proceed with i2”. FEMA point lookup, local API, overlay/source details and tests are authorized. The implementation follows the existing 15 m provisional radius and proposed 24-hour/7-day FEMA cache policy. See [I2 implementation record](i2-fema-implementation.md). Hosting remains undecided; NOAA, AI answers, merging and deployment still need separate approval.

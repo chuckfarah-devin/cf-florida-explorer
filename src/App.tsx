@@ -7,8 +7,9 @@ import { PlacePanel } from './components/PlacePanel';
 import { AskPreview } from './components/AskPreview';
 import { REFERENCE_LAYERS, type LayerStatus, type ReferenceLayerId } from './config/layers';
 import { initialSelection, selectionReducer } from './state/selection';
-import type { LatLon } from './config/bounds';
+import { checkPoint, type LatLon } from './config/bounds';
 import type { MapHandle } from './map/arcgis';
+import type { TideStationMarker } from './map/noaaStations';
 
 type Rec<T> = Record<ReferenceLayerId, T>;
 const allOff = Object.fromEntries(REFERENCE_LAYERS.map((l) => [l.id, false])) as Rec<boolean>;
@@ -30,9 +31,21 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
   const mapDiv = useRef<HTMLDivElement>(null);
   const handle = useRef<MapHandle | null>(null);
   const api = useRef<MapApi | null>(null);
+  const currentSelection = useRef(sel.current);
+  const tideMarkers = useRef<TideStationMarker[]>([]);
+  const showTideStations = useCallback((stations: TideStationMarker[]) => {
+    tideMarkers.current = stations;
+    handle.current?.setTideStations?.(stations);
+  }, []);
 
-  const select = useCallback((point: LatLon, source: 'pointer' | 'keyboard' | 'typed' | 'search', placeName?: string) =>
-    dispatch({ type: 'select', point, source, placeName }), []);
+  const select = useCallback((point: LatLon, source: 'pointer' | 'keyboard' | 'typed' | 'search', placeName?: string) => {
+    if (checkPoint(point).ok) showTideStations([]);
+    dispatch({ type: 'select', point, source, placeName });
+  }, [showTideStations]);
+  const changeDomain = (next: DomainId) => {
+    if (next !== domain) showTideStations([]);
+    setDomain(next);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -44,15 +57,23 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
         onEnter: () => handle.current && select(handle.current.center(), 'keyboard'),
         onLayerStatus: (id, s) => setStatus((prev) => ({ ...prev, [id]: s })),
       });
-      if (cancelled) h.destroy(); else handle.current = h;
+      if (cancelled) h.destroy(); else {
+        handle.current = h;
+        h.setTideStations?.(tideMarkers.current);
+        const selected = currentSelection.current;
+        h.setMarker(selected?.point ?? null);
+        if (selected && selected.source !== 'pointer') h.goTo(selected.point);
+      }
     }).catch(() => setMapError('The map could not load. You can still enter coordinates in the search box.'));
     return () => { cancelled = true; handle.current?.destroy(); handle.current = null; };
   }, [mapApi, select]);
 
+  const selectedPlace = sel.current;
   useEffect(() => {
-    handle.current?.setMarker(sel.current?.point ?? null);
-    if (sel.current && sel.current.source !== 'pointer') handle.current?.goTo(sel.current.point);
-  }, [sel]);
+    currentSelection.current = selectedPlace;
+    handle.current?.setMarker(selectedPlace?.point ?? null);
+    if (selectedPlace && selectedPlace.source !== 'pointer') handle.current?.goTo(selectedPlace.point);
+  }, [selectedPlace]);
 
   const toggle = (id: ReferenceLayerId) => {
     const next = !enabled[id];
@@ -66,7 +87,7 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
 
   return (
     <div className="app">
-      <Header domain={domain} onDomain={setDomain} search={
+      <Header domain={domain} onDomain={changeDomain} search={
         <SearchBox
           onCoordinates={(p) => select(p, 'typed')}
           onPlace={(c: PlaceCandidate) => select(c.point, 'search', c.name.split(',')[0])}
@@ -93,7 +114,7 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
             onSelectCenter={() => handle.current && select(handle.current.center(), 'keyboard')} />
         </div>
         <aside className="panel" aria-label="This place">
-          <div className="pscroll"><PlacePanel selection={sel.current} domain={domain} /></div>
+          <div className="pscroll"><PlacePanel selection={sel.current} domain={domain} onStations={showTideStations} /></div>
           <AskPreview placeLabel={placeLabel} />
         </aside>
       </main>

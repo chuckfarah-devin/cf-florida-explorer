@@ -3,9 +3,11 @@ import { FLORIDA_BOUNDS } from '../config/bounds';
 import type { ReferenceLayerConfig, LayerStatus } from '../config/layers';
 import type { PlaceCandidate } from '../components/SearchBox';
 import { layersForFailedUrl } from './layerErrors';
+import { stationLabel, type TideStationMarker } from './noaaStations';
 
 export interface MapHandle {
   setMarker: (p: LatLon | null) => void;
+  setTideStations?: (stations: TideStationMarker[]) => void;
   goTo: (p: LatLon) => void;
   center: () => LatLon;
   zoom: (delta: number) => void;
@@ -49,6 +51,7 @@ export async function createMap(
   };
   esriConfig.request.interceptors?.push(interceptor);
   const marker = new GraphicsLayer({ title: 'Selected place', listMode: 'hide' });
+  const tideStations = new GraphicsLayer({ title: 'NOAA tide stations', listMode: 'hide' });
   const map = new EsriMap({ basemap: apiKey ? 'arcgis/light-gray' : 'osm' });
   const layerById = new Map<string, InstanceType<typeof FeatureLayer> | InstanceType<typeof MapImageLayer>>();
   const makeLayer = (cfg: ReferenceLayerConfig) => cfg.render === 'feature'
@@ -59,6 +62,7 @@ export async function createMap(
     layerById.set(cfg.id, layer);
     map.add(layer);
   }
+  map.add(tideStations);
   map.add(marker);
   const view = new MapView({
     container, map, center: [-81.6, 27.8], zoom: 6,
@@ -80,10 +84,22 @@ export async function createMap(
     }, () => undefined);
   };
   // The SDK owns the keyboard surface: its aria option survives localization and surface updates.
-  view.on('click', (e) => { const mp = e.mapPoint; if (mp?.latitude != null && mp.longitude != null) handlers.onClick({ lat: mp.latitude, lon: mp.longitude }); });
+  let clickSequence = 0;
+  let navigationSequence = 0;
+  view.on('click', async (e) => {
+    const sequence = ++clickSequence;
+    const mp = e.mapPoint;
+    // A station popup must not silently replace the user's selected place.
+    try {
+      const hit = await view.hitTest(e, { include: [tideStations] });
+      if (hit.results.length > 0) return;
+    } catch { /* Normal point selection remains available if hit testing fails. */ }
+    if (!destroyed && sequence === clickSequence && mp?.latitude != null && mp.longitude != null) handlers.onClick({ lat: mp.latitude, lon: mp.longitude });
+  });
   // Enter selects the same center as the explicit button, even before the SDK navigation engine is ready.
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key !== 'Enter' || event.target !== container.querySelector('.esri-view-surface')) return;
+    clickSequence++;
     event.preventDefault(); event.stopPropagation(); handlers.onEnter();
   };
   container.addEventListener('keydown', onKeyDown, true);
@@ -108,10 +124,42 @@ export async function createMap(
 
   return {
     setMarker(p) {
+      clickSequence++;
+      navigationSequence++;
       marker.removeAll();
       if (p) marker.add(new Graphic({ geometry: { type: 'point', latitude: p.lat, longitude: p.lon }, symbol: { type: 'simple-marker', color: '#e2603f', size: 16, outline: { color: '#ffffff', width: 2.5 } } }));
     },
-    goTo(p) { void view.goTo({ center: [p.lon, p.lat], zoom: Math.max(view.zoom, 14) }).catch(() => undefined); },
+    setTideStations(stations) {
+      if (destroyed) return;
+      tideStations.removeAll();
+      for (const station of stations) {
+        if (!Number.isFinite(station.lat) || !Number.isFinite(station.lon) || Math.abs(station.lat) > 90 || Math.abs(station.lon) > 180) continue;
+        const label = stationLabel(station);
+        const content = document.createElement('div');
+        const title = document.createElement('strong');
+        title.textContent = label;
+        const explanation = document.createElement('p');
+        explanation.textContent = `NOAA station ${station.id}. ${station.observed ? 'Measurements describe water at this gauge' : 'Predictions describe astronomical tides at this station'}, not water at your selected spot or flooding in its streets.`;
+        content.append(title, explanation);
+        tideStations.add(new Graphic({
+          geometry: { type: 'point', latitude: station.lat, longitude: station.lon },
+          symbol: { type: 'simple-marker', style: station.observed ? 'circle' : 'triangle', color: station.observed ? '#007080' : '#6d40b8', size: 14, outline: { color: '#ffffff', width: 2 } },
+          attributes: { stationId: station.id, stationLabel: label },
+          popupTemplate: { title: 'NOAA tide station', content },
+        }));
+        tideStations.add(new Graphic({
+          geometry: { type: 'point', latitude: station.lat, longitude: station.lon },
+          symbol: { type: 'text', text: label, color: '#173b49', haloColor: '#ffffff', haloSize: 2, yoffset: 17, font: { size: 10, family: 'sans-serif' } },
+        }));
+      }
+    },
+    goTo(p) {
+      const sequence = ++navigationSequence;
+      const target = { ...p };
+      void view.when().then(() => {
+        if (!destroyed && sequence === navigationSequence) return view.goTo({ center: [target.lon, target.lat], zoom: Math.max(view.zoom, 14) });
+      }).catch(() => undefined);
+    },
     center() { return { lat: view.center.latitude ?? 0, lon: view.center.longitude ?? 0 }; },
     zoom(delta) { void view.goTo({ zoom: view.zoom + delta }).catch(() => undefined); },
     setLayerVisible(id, visible) {

@@ -29,6 +29,19 @@ test.beforeEach(async ({ page }) => {
     await route.fulfill({ path: asset, ...(asset.endsWith('.wasm') ? { contentType: 'application/wasm' } : {}) });
   });
   await page.route('**/api/fema', (route) => route.fulfill({ json: fixture(route.request().postDataJSON()) }));
+  await page.route('**/api/noaa', (route) => {
+    const r = route.request().postDataJSON();
+    return route.fulfill({ json: {
+      point: { lat: r.lat, lon: r.lon }, selectionId: r.selectionId,
+      window: { startDate: r.startDate, endDate: r.endDate, startUtc: '2026-10-25T04:00:00.000Z', endUtc: '2026-10-30T04:00:00.000Z', timeZone: 'America/New_York' },
+      datum: r.datum, units: 'ft', retrievedAtUtc: '2026-11-04T12:00:00Z', state: 'ok', stations: [{
+        id: '8722670', name: 'Lake Worth Pier, Atlantic Ocean', lat: 26.612778, lon: -80.034164, waterBody: 'Atlantic Ocean', distanceKm: 11.7, bearing: 'N', rationale: 'Synthetic fixture; observations apply only at the gauge.', metadataUrl: 'https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/8722670.json',
+        products: [{ product: 'water_level', state: 'ok', queryUrl: 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', retrievedAtUtc: '2026-11-04T12:00:00Z', rows: [{ timeUtc: '2026-10-25T12:00:00.000Z', value: 3.25, quality: 'preliminary', flags: '1,0,0,0' }] },
+          { product: 'predictions', state: 'ok', queryUrl: 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', retrievedAtUtc: '2026-11-04T12:00:00Z', rows: [{ timeUtc: '2026-10-25T12:30:00.000Z', value: 3.1, kind: 'H' }] }],
+        htf: { state: 'no_data', queryUrl: 'https://api.tidesandcurrents.noaa.gov/dpapi/prod/webapi/htf/htf_daily.json', retrievedAtUtc: '2026-11-04T12:00:00Z', datum: 'STND', units: 'ft', rows: [] },
+      }],
+    } });
+  });
   await page.goto('/');
   await expect(page.getByRole('searchbox')).toBeVisible();
 });
@@ -47,6 +60,20 @@ async function axe(page: Page) {
 
 test('desktop start screen has no WCAG A/AA violations', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
+  await axe(page);
+});
+
+test('NOAA panel separates preliminary measurements and predictions with accessible controls', async ({ page }) => {
+  await selectTyped(page);
+  const tides = page.getByRole('region', { name: 'NOAA tides nearby' });
+  await expect(tides.getByRole('heading', { name: 'Lake Worth Pier, Atlantic Ocean' })).toBeVisible();
+  await expect(tides).toContainText('Preliminary');
+  await expect(tides.getByRole('img', { name: /tide chart/ })).toBeVisible();
+  await tides.getByText('View tide times and values').click();
+  await expect(tides.getByRole('heading', { name: 'Predicted high tides' })).toBeVisible();
+  await expect(tides.getByLabel('Start date')).toHaveValue('2026-10-25');
+  await tides.getByText('NOAA · Lake Worth Pier, Atlantic Ocean · Sources and details').click();
+  await expect(tides).toContainText('no datum conversion');
   await axe(page);
 });
 
