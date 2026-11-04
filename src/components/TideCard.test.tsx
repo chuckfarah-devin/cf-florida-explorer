@@ -26,6 +26,8 @@ describe('NOAA tide card', () => {
   it('separates measured maxima, predictions, quality, flags and local references', async () => {
     render(<TideCard selection={selection} lookup={vi.fn(async () => response())} />);
     expect(await screen.findByRole('heading', { name: 'Lake Worth Pier' })).toBeVisible();
+    expect(screen.getByRole('img', { name: /Lake Worth Pier: tide chart/ })).toBeVisible();
+    await userEvent.click(screen.getByText('View tide times and values'));
     const measured = screen.getByRole('region', { name: 'Daily measured maxima table' });
     expect(within(measured).getByText('3.200')).toBeVisible();
     expect(within(measured).getByText(/Preliminary data; may change · 2 samples/)).toBeVisible();
@@ -55,7 +57,24 @@ describe('NOAA tide card', () => {
     expect(lookup.mock.calls[1][1]).toEqual({ startDate: '2026-10-26', endDate: '2026-10-29', datum: 'NAVD' });
     await act(async () => resolveOld(response()));
     expect(screen.queryByText(/Results: 2026-10-25 through/)).toBeNull();
-    expect(screen.getAllByText(/this height reference is not available/)).toHaveLength(2);
+    expect(screen.getAllByText(/isn’t available in NAVD88/)).toHaveLength(2);
+  });
+
+  it('labels unapplied edits and explains an unsupported datum without claiming an outage', async () => {
+    const data = response(); data.datum = 'NAVD'; data.state = 'partial';
+    data.stations.push({ ...data.stations[0], id: '8722718', name: 'Ocean Ridge', waterBody: 'Intracoastal Waterway', products: [{ ...data.stations[0].products[1], state: 'datum_unavailable', rows: [] }] });
+    const lookup = vi.fn(async (_selection, window) => window.datum === 'NAVD' ? data : response());
+    render(<TideCard selection={selection} lookup={lookup} />);
+    await screen.findByRole('img');
+    await userEvent.selectOptions(screen.getByLabelText('Height reference'), 'NAVD');
+    expect(screen.getByText(/Changes not applied yet/)).toBeVisible();
+    expect(lookup).toHaveBeenCalledTimes(1);
+    await userEvent.click(screen.getByRole('button', { name: 'Compare tides' }));
+    expect(await screen.findByText(/Ocean Ridge isn’t available in NAVD88/)).toBeVisible();
+    expect(screen.queryByText(/Changes not applied yet/)).toBeNull();
+    expect(screen.getByText(/Some stations do not support/)).toBeVisible();
+    expect(screen.queryByText(/sources are unavailable right now/)).toBeNull();
+    expect(screen.getAllByRole('img')).toHaveLength(1);
   });
 
   it('clears old point markers and ignores late responses even if abort is ignored', async () => {

@@ -3,6 +3,7 @@ import type { Selection } from '../state/selection';
 import { fetchTides } from '../noaa/client';
 import type { TideProduct, TideRequest, TideResponse, TideRow } from '../noaa/types';
 import type { TideStationMarker } from '../map/noaaStations';
+import { TideChart } from './TideChart';
 
 const initialWindow: TideRequest = { startDate: '2026-10-25', endDate: '2026-10-29', datum: 'MLLW' };
 const dayFormat = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -81,6 +82,7 @@ export function TideCard({ selection, lookup = fetchTides, onStations }: { selec
       </fieldset>
       <p className="tide-caption">Starts with your reported October 25–29, 2026 event window. Dates are inclusive in America/New_York.</p>
       {error && <p role="alert">{error}</p>}
+      {(draft.startDate !== request.window.startDate || draft.endDate !== request.window.endDate || draft.datum !== request.window.datum) && <p className="tide-notice" role="status">Changes not applied yet. Press Compare tides to update the results.</p>}
       <button className="btn" type="submit">Compare tides</button>
     </form>
     <div aria-busy={!active}>
@@ -89,11 +91,13 @@ export function TideCard({ selection, lookup = fetchTides, onStations }: { selec
       {result?.state === 'no_suitable_station' && <p>Station comparisons currently cover a limited Briny Breezes–Ocean Ridge coastal area. This point has no suitable station in that curated set (provisional); we have not assessed all Florida stations.</p>}
       {result && result.stations.length > 0 && <>
         <p className="tide-window"><strong>Results: {result.window.startDate} through {result.window.endDate}</strong> · feet {datumLabel(result.datum)} · America/New_York (EST/EDT).</p>
-        {result.state === 'partial' && <p className="tide-notice">Some NOAA sources could not be retrieved. Missing results are not a sign of low water.</p>}
+        {result.state === 'partial' && <p className="tide-notice">{result.stations.some((s) => s.products.some((p) => p.state === 'unavailable') || s.htf?.state === 'unavailable') || result.stations.length < 2 ? 'Some NOAA sources are unavailable right now. Missing results are not a sign of low water.' : 'Some stations do not support the selected height reference. Available results are shown below.'}</p>}
         <p className="tide-limits">The ocean and Intracoastal are different water bodies. No nearby measured Intracoastal record is included in this curated comparison. These stations cannot establish water depth, flooding, or its cause at your selected spot. Tide heights and FEMA base flood elevations are not compared here.</p>
         {result.stations.map((station) => <article className="tide-station" key={station.id}>
           <h3>{station.name}</h3><p>{station.waterBody} · {station.distanceKm.toFixed(1)} km {station.bearing} from your spot (straight-line distance).</p>
-          {station.products.map((product) => <div key={product.product} className="tide-product"><ProductTable product={product} datum={result.datum} /></div>)}
+          <TideChart station={station} result={result} />
+          {station.products.filter((p) => p.state !== 'ok').map((product) => <p key={product.product} className="tide-notice">{product.state === 'datum_unavailable' ? `${station.name} isn’t available in ${datumLabel(result.datum)}. Choose MLLW to see its ${product.product === 'predictions' ? 'predictions' : 'measurements'}. No conversion was assumed.` : product.state === 'no_data' ? `${product.product === 'water_level' ? 'Measured water levels' : 'Predicted tides'}: NOAA returned no data for this period. This is not evidence that water levels were low.` : `${product.product === 'water_level' ? 'Measured water levels' : 'Predicted tides'} are unavailable right now.`}</p>)}
+          {station.products.some((p) => p.state === 'ok') && <details className="tide-details"><summary>View tide times and values</summary>{station.products.filter((p) => p.state === 'ok').map((product) => <div key={product.product} className="tide-product"><ProductTable product={product} datum={result.datum} /></div>)}</details>}
           {station.htf && <p className="tide-caption">High-tide-flooding daily product: {station.htf.state === 'ok' && station.htf.rows.length ? `${station.htf.rows.length} daily station record(s) available; see the source for station-only flags and completeness.` : station.htf.state === 'no_data' ? 'NOAA returned no daily records for this period. This does not mean zero flooding days.' : 'unavailable; no flooding-day count is inferred.'}</p>}
           {station.htf?.state === 'ok' && station.htf.rows.length > 0 && <details className="tide-details"><summary>Station flooding-day reports</summary>
             <p>Dates below are NOAA report dates; their time basis has not been verified against the local calendar-day maxima above. Heights are feet relative to station datum (STND), regardless of the height reference selected above. Flood-threshold flags describe this station only.</p>

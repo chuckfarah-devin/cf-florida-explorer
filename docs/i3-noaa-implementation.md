@@ -4,6 +4,8 @@ Chuck authorized the next tide-comparison step on 2026-11-04 (“ok lets do it�
 
 ## Behavior and limits
 
+November 4 visual refinement, approved by Chuck: each station now has a chart before expandable tables. Returned six-minute measurements use a line broken at missing samples; predicted high tides use separate outlined points, never an invented continuous prediction curve. Station scales remain independent and labelled. Pending form edits are marked not applied. Unsupported height references are described separately from service outages. No new NOAA products or dependencies were added.
+
 - Water & Weather now includes an editable date period, station cards and station map markers. Ask This Place remains Preview. Inclusive local dates are converted to UTC with an exclusive end instant, including daylight-saving transitions.
 - Provisional curated area: latitude26.43–26.68, longitude−80.10–−79.98; each station must also be within25km. This bounded Briny Breezes/Ocean Ridge study area is not an exhaustive Florida station search or hydrodynamic suitability assessment. Outside it the UI says the curated set does not cover the point, rather than claiming that no station exists.
 - Lake Worth Pier, Atlantic Ocean (8722670): six-minute measured water levels and astronomical tide predictions. Ocean Ridge (8722718): predictions only, Intracoastal Waterway. Each station's own NOAA metadata supplies its name/coordinates. Water-body labels/rationale are curated; distance and bearing are derived from the selected point.

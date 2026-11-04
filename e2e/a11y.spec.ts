@@ -68,6 +68,8 @@ test('NOAA panel separates preliminary measurements and predictions with accessi
   const tides = page.getByRole('region', { name: 'NOAA tides nearby' });
   await expect(tides.getByRole('heading', { name: 'Lake Worth Pier, Atlantic Ocean' })).toBeVisible();
   await expect(tides).toContainText('Preliminary');
+  await expect(tides.getByRole('img', { name: /tide chart/ })).toBeVisible();
+  await tides.getByText('View tide times and values').click();
   await expect(tides.getByRole('heading', { name: 'Predicted high tides' })).toBeVisible();
   await expect(tides.getByLabel('Start date')).toHaveValue('2026-10-25');
   await tides.getByText('NOAA · Lake Worth Pier, Atlantic Ocean · Sources and details').click();
