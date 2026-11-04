@@ -5,13 +5,16 @@ const sdk = vi.hoisted(() => {
   const layers: FakeLayer[] = [];
   const ready = vi.fn(() => Promise.resolve());
   const makeLegend = vi.fn();
+  const goTo = vi.fn(() => Promise.resolve());
+  const hitTest = vi.fn(() => Promise.resolve({ results: [] as object[] }));
+  const clicks: ((event: object) => Promise<void>)[] = [];
   class FakeLayer {
     visible = false;
     load = vi.fn(() => Promise.resolve());
     destroy = vi.fn();
     constructor(options: object) { Object.assign(this, options); layers.push(this); }
-    removeAll() {}
-    add() {}
+    removeAll = vi.fn();
+    add = vi.fn();
   }
   class FakeMap {
     layers = { indexOf: () => 0 };
@@ -25,16 +28,18 @@ const sdk = vi.hoisted(() => {
     zoom = 6;
     when = () => ready();
     whenLayerView = vi.fn(() => Promise.resolve({ updating: false }));
-    on = vi.fn();
+    on = vi.fn((name: string, callback: (event: object) => Promise<void>) => { if (name === 'click') clicks.push(callback); });
+    hitTest = hitTest;
+    goTo = goTo;
     destroy = vi.fn();
     constructor({ container, aria }: { container: HTMLElement; aria: { label: string } }) { surface.className = 'esri-view-surface'; surface.setAttribute('role', 'application'); surface.setAttribute('aria-label', aria.label); container.append(surface); }
   }
-  return { layers, ready, makeLegend, FakeLayer, FakeMap, FakeView, surface, config: { request: { interceptors: [] as { error: (err: { details: { url: string } }) => void }[] } } };
+  return { layers, ready, makeLegend, goTo, hitTest, clicks, FakeLayer, FakeMap, FakeView, surface, config: { request: { interceptors: [] as { error: (err: { details: { url: string } }) => void }[] } } };
 });
 vi.mock('@arcgis/core/config.js', () => ({ default: sdk.config }));
 vi.mock('@arcgis/core/Map.js', () => ({ default: sdk.FakeMap }));
 vi.mock('@arcgis/core/views/MapView.js', () => ({ default: sdk.FakeView }));
-vi.mock('@arcgis/core/Graphic.js', () => ({ default: class {} }));
+vi.mock('@arcgis/core/Graphic.js', () => ({ default: class { constructor(options: object) { Object.assign(this, options); } } }));
 vi.mock('@arcgis/core/layers/GraphicsLayer.js', () => ({ default: sdk.FakeLayer }));
 vi.mock('@arcgis/core/layers/FeatureLayer.js', () => ({ default: sdk.FakeLayer }));
 vi.mock('@arcgis/core/layers/MapImageLayer.js', () => ({ default: sdk.FakeLayer }));
@@ -46,6 +51,9 @@ import { createMap, MAP_LABEL } from './arcgis';
 afterEach(() => {
   sdk.ready.mockReset().mockResolvedValue(undefined);
   sdk.makeLegend.mockReset();
+  sdk.goTo.mockClear();
+  sdk.hitTest.mockReset().mockResolvedValue({ results: [] });
+  sdk.clicks.length = 0;
 });
 
 async function setup() {
@@ -55,14 +63,93 @@ async function setup() {
   sdk.config.request.interceptors.length = 0;
   const onLayerStatus = vi.fn();
   const onEnter = vi.fn();
-  const handle = await createMap(document.createElement('div'), REFERENCE_LAYERS, { onClick: vi.fn(), onEnter, onLayerStatus });
-  const layer = sdk.layers[3]; // Graphics layer, wetlands, conservation, aquatic preserves.
+  const onClick = vi.fn();
+  const handle = await createMap(document.createElement('div'), REFERENCE_LAYERS, { onClick, onEnter, onLayerStatus });
+  const layer = sdk.layers[4]; // Selected place + tide graphics layers, wetlands, conservation, aquatic preserves.
   const config = REFERENCE_LAYERS.find((l) => l.id === 'aquatic-preserves')!;
   const fail = () => sdk.config.request.interceptors[0].error({ details: { url: `${config.serviceUrl}/0/query` } });
-  return { handle, layer, onLayerStatus, onEnter, fail };
+  return { handle, layer, onLayerStatus, onEnter, onClick, fail };
 }
 
 describe('ArcGIS layer lifecycle', () => {
+  it('waits for view readiness and navigates only to the newest requested point', async () => {
+    let ready!: () => void;
+    const pending = new Promise<void>((resolve) => { ready = resolve; });
+    sdk.ready.mockReturnValue(pending);
+    const { handle } = await setup();
+    handle.goTo({ lat: 26.51, lon: -80.05 });
+    handle.goTo({ lat: 26.52, lon: -80.06 });
+    expect(sdk.goTo).not.toHaveBeenCalled();
+    ready();
+    await vi.waitFor(() => expect(sdk.goTo).toHaveBeenCalledOnce());
+    expect(sdk.goTo).toHaveBeenCalledWith({ center: [-80.06, 26.52], zoom: 14 });
+    handle.destroy();
+  });
+
+  it('drops queued navigation after a newer pointer marker or map destruction', async () => {
+    let ready!: () => void;
+    const pending = new Promise<void>((resolve) => { ready = resolve; });
+    sdk.ready.mockReturnValue(pending);
+    const { handle } = await setup();
+    handle.goTo({ lat: 26.51, lon: -80.05 });
+    handle.setMarker({ lat: 26.52, lon: -80.06 });
+    ready();
+    await Promise.resolve();
+    expect(sdk.goTo).not.toHaveBeenCalled();
+    handle.goTo({ lat: 26.53, lon: -80.07 });
+    handle.destroy();
+    await Promise.resolve();
+    expect(sdk.goTo).not.toHaveBeenCalled();
+  });
+  it('uses distinct station symbols, source-specific labels and text-only popup content without moving the selected marker', async () => {
+    const { handle } = await setup();
+    const pointLayer = sdk.layers[0];
+    const stations = sdk.layers[1];
+    handle.setTideStations!([
+      { id: '8722670', name: 'Lake Worth Pier', lat: 26.612778, lon: -80.034164, waterBody: 'Atlantic Ocean', observed: true },
+      { id: '8722718', name: '<img src=x>', lat: 26.5, lon: -80.05, waterBody: 'Intracoastal', observed: false },
+    ]);
+    const graphics = stations.add.mock.calls.map((call) => call[0]);
+    expect(graphics[0].symbol.style).toBe('circle');
+    expect(graphics[2].symbol.style).toBe('triangle');
+    expect(graphics[0].popupTemplate.content.textContent).toContain('not water at your selected spot');
+    expect(graphics[2].popupTemplate.content.querySelector('img')).toBeNull();
+    expect(graphics[3].symbol.text).toContain('<img src=x>');
+    expect(pointLayer.removeAll).not.toHaveBeenCalled();
+    handle.setTideStations!([]);
+    expect(stations.removeAll).toHaveBeenCalledTimes(2);
+    handle.destroy();
+    handle.setTideStations!([]);
+    expect(stations.removeAll).toHaveBeenCalledTimes(2);
+  });
+
+  it('opens a station without selecting its coordinates and discards delayed hit tests after destruction', async () => {
+    const { handle, onClick } = await setup();
+    sdk.hitTest.mockResolvedValueOnce({ results: [{}] });
+    await sdk.clicks[0]({ mapPoint: { latitude: 26.6, longitude: -80.03 } });
+    expect(onClick).not.toHaveBeenCalled();
+    await sdk.clicks[0]({ mapPoint: { latitude: 26.5, longitude: -80.05 } });
+    expect(onClick).toHaveBeenCalledWith({ lat: 26.5, lon: -80.05 });
+    let finish!: (result: { results: object[] }) => void;
+    sdk.hitTest.mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
+    const pending = sdk.clicks[0]({ mapPoint: { latitude: 26.7, longitude: -80.04 } });
+    handle.destroy();
+    finish({ results: [] });
+    await pending;
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not let a pending map hit test replace a newer typed point', async () => {
+    const { handle, onClick } = await setup();
+    let finish!: (result: { results: object[] }) => void;
+    sdk.hitTest.mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
+    const pending = sdk.clicks[0]({ mapPoint: { latitude: 26.7, longitude: -80.04 } });
+    handle.setMarker({ lat: 26.5, lon: -80.05 });
+    finish({ results: [] });
+    await pending;
+    expect(onClick).not.toHaveBeenCalled();
+    handle.destroy();
+  });
   it('selects the map center on native Enter before SDK readiness and removes the listener on destroy', async () => {
     sdk.ready.mockReturnValueOnce(new Promise<void>(() => {}));
     const { handle, onEnter } = await setup();

@@ -1,13 +1,14 @@
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App, { type MapApi } from './App';
 import type { MapHandle } from './map/arcgis';
 
 function fakeApi() {
-  const calls: { visible: [string, boolean][]; markers: unknown[] } = { visible: [], markers: [] };
+  const calls: { visible: [string, boolean][]; markers: unknown[]; tideStations: unknown[][] } = { visible: [], markers: [], tideStations: [] };
   let click: ((p: { lat: number; lon: number }) => void) | undefined;
   const handle: MapHandle = {
     setMarker: (p) => calls.markers.push(p), goTo: () => {}, center: () => ({ lat: 26.5089, lon: -80.0522 }), zoom: () => {},
+    setTideStations: (stations) => calls.tideStations.push(stations),
     setLayerVisible: (id, v) => calls.visible.push([id, v]), retryLayer: () => {}, destroy: () => {},
   };
   const api: MapApi = {
@@ -18,6 +19,39 @@ function fakeApi() {
 }
 
 describe('App (I1)', () => {
+  it('applies the latest selected point when map initialization finishes after coordinate selection', async () => {
+    const user = userEvent.setup();
+    let finish!: (handle: MapHandle) => void;
+    const handle: MapHandle = {
+      setMarker: vi.fn(), setTideStations: vi.fn(), goTo: vi.fn(), center: () => ({ lat: 27, lon: -81 }),
+      zoom: vi.fn(), setLayerVisible: vi.fn(), retryLayer: vi.fn(), destroy: vi.fn(),
+    };
+    const delayedApi: MapApi = { createMap: () => new Promise((resolve) => { finish = resolve; }), findPlaces: async () => [] };
+    const mapApi = () => Promise.resolve(delayedApi);
+    render(<App mapApi={mapApi} />);
+    const box = screen.getByRole('searchbox');
+    await user.type(box, '26.5089, -80.0522{Enter}');
+    await user.clear(box);
+    await user.type(box, '26.5084, -80.0546{Enter}');
+    expect(handle.setMarker).not.toHaveBeenCalled();
+    await act(async () => { finish(handle); });
+    await waitFor(() => expect(handle.setMarker).toHaveBeenLastCalledWith({ lat: 26.5084, lon: -80.0546 }));
+    expect(handle.goTo).toHaveBeenCalledWith({ lat: 26.5084, lon: -80.0546 });
+    expect(handle.goTo).not.toHaveBeenCalledWith({ lat: 26.5089, lon: -80.0522 });
+  });
+  it('clears station graphics on accepted selections and domain changes', async () => {
+    const user = userEvent.setup();
+    const f = fakeApi();
+    render(<App mapApi={f.api} />);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const initial = f.calls.tideStations.length;
+    await user.type(screen.getByRole('searchbox'), '26.5089, -80.0522{Enter}');
+    expect(f.calls.tideStations.length).toBeGreaterThan(initial);
+    const beforeDomain = f.calls.tideStations.length;
+    await user.click(screen.getByRole('button', { name: 'Nature & Wildlife' }));
+    expect(f.calls.tideStations.length).toBeGreaterThan(beforeDomain);
+    expect(f.calls.tideStations.at(-1)).toEqual([]);
+  });
   it('has descriptively labelled map controls (N32)', async () => {
     render(<App mapApi={fakeApi().api} />);
     for (const name of ['Map layers', '+ Zoom in', '− Zoom out', '⊕ Select map center']) {

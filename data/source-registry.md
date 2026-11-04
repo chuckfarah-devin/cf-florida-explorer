@@ -1,5 +1,9 @@
 # Evidence/source registry — 2026-11-02
 
+## I3 verification update — 2026-11-04
+
+NOAA S02/S03 now support a bounded Briny Breezes/Ocean Ridge station comparison:8722670 observations/predictions and8722718 predictions, with source-specific metadata, direct datum requests and independent HTF daily source states. Live October25–29,2026 local requests returned1,200 preliminary observed samples,20/19 high-low predictions respectively, and no daily HTF records. Ocean Ridge has no numeric NAVD88 value in the retrieved datum table; that reference is refused there. See [I3 record](../docs/i3-noaa-implementation.md). No station result establishes water in a street or event causation.
+
 ## I2 verification update — 2026-11-03
 
 FEMA S01 now has a working server-side connector for layers 28 (exact and separate 15 m buffer), 0 (coverage), 3 (panels), and 1 (revisions). Public metadata and live requests were checked; a complete repeat run at BB-P1/BB-P2 returned AE/X respectively. An earlier partial run exposed transient ancillary failures. See [I2 record](../docs/i2-fema-implementation.md) for provenance, caching, caveats and test limits. The original documentation-only statuses below are historical. No October-event flood extent or home damage was established by these queries.
