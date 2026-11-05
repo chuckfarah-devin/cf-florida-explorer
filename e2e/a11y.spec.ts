@@ -29,8 +29,14 @@ test.beforeEach(async ({ page }) => {
     await route.fulfill({ path: asset, ...(asset.endsWith('.wasm') ? { contentType: 'application/wasm' } : {}) });
   });
   await page.route('**/api/fema', (route) => route.fulfill({ json: fixture(route.request().postDataJSON()) }));
+  await page.route('**/api/nature', (route) => {
+    const r = route.request().postDataJSON();
+    const park = { id: 'conservation:1', name: 'Synthetic coastal preserve', agency: 'Synthetic county', distanceMeters: 1200, bearing: 'N', inside: false, geometry: { rings: [[[-80.053,26.52],[-80.05,26.52],[-80.05,26.522],[-80.053,26.522],[-80.053,26.52]]], spatialReference: { wkid: 4326 } } };
+    return route.fulfill({ json: { point: { lat: r.lat, lon: r.lon }, selectionId: r.selectionId, radiusMeters: 5000, retrievedAtUtc: '2026-11-05T12:00:00Z', nearby: [park], sources: ['wetlands','conservation','preserves','nearby'].map((id) => ({ id, state: 'ok', queryUrl: 'https://ca.dep.state.fl.us/arcgis/rest/services/Map_Direct/Environment/MapServer/38/query?f=json', retrievedAtUtc: '2026-11-05T12:00:00Z', features: id === 'nearby' ? [park] : [] })) } });
+  });
   await page.route('**/api/ask', (route) => {
     const r = route.request().postDataJSON();
+    if (r.domain === 'nature') return route.fulfill({ json: { domain: 'nature', selectionId: r.selectionId, point: { lat: r.lat, lon: r.lon }, window: { startDate: r.startDate, endDate: r.endDate, datum: r.datum }, question: r.question, packId: 'synthetic-nature-pack', createdAtUtc: '2026-11-05T12:00:00Z', mode: 'template', intent: 'nature', supported: true, findings: [{ id: 'N1', text: 'Synthetic coastal preserve has a mapped boundary nearby.', evidenceClass: 'mapped_feature', citations: ['E1'] }], limitations: ['Public access must be checked with the managing agency.'], statuses: [{ source: 'Conservation lands', state: 'ok' }], sources: [{ ref: 'E1', label: 'Florida conservation lands', kind: 'mapped_feature', url: 'https://ca.dep.state.fl.us/arcgis/rest/services/Map_Direct/Environment/MapServer/38/query?f=json', retrievedAtUtc: '2026-11-05T12:00:00Z' }] } });
     return route.fulfill({ json: { selectionId: r.selectionId, point: { lat: r.lat, lon: r.lon }, window: { startDate: r.startDate, endDate: r.endDate, datum: r.datum }, question: r.question, packId: 'synthetic-ask-pack', createdAtUtc: '2026-11-04T18:00:00Z', mode: 'template', intent: 'flood', supported: true,
       findings: [{ id: 'F1', text: 'Synthetic FEMA fixture: this selected spot is mapped in Zone AE.', evidenceClass: 'regulatory_classification', citations: ['E1'] }], limitations: ['Mapped classification does not establish actual street flooding.'], statuses: [{ source: 'FEMA flood map', state: 'classified' }], sources: [{ ref: 'E1', label: 'FEMA flood map', kind: 'regulatory_classification', url: 'https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?f=json', retrievedAtUtc: '2026-11-04T18:00:00Z' }],
     } });
@@ -63,6 +69,29 @@ async function axe(page: Page) {
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze();
   expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
 }
+
+test('Nature shows mapped matches separately from nearby places; Show on map preserves the selected point', async ({ page }) => {
+  await selectTyped(page); await page.getByRole('button', { name: 'Nature & Wildlife', exact: true }).click();
+  const nature = page.getByRole('region', { name: 'Nature at this place' });
+  await expect(nature).toContainText('No conservation-land polygon was returned');
+  await expect(nature).toContainText('1.20 km N to mapped boundary');
+  await page.getByRole('button', { name: 'Show exact location' }).click();
+  await nature.getByRole('button', { name: 'Show Synthetic coastal preserve on map' }).click();
+  await expect(page.locator('.coords')).toHaveText('26.50890, −80.05220');
+  await expect(nature).toContainText('Check with the managing agency'); await axe(page);
+});
+
+test('mobile Nature Ask returns mapped-feature citations and clears them on domain change', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); await selectTyped(page);
+  await page.getByRole('button', { name: 'Nature & Wildlife', exact: true }).click();
+  await page.getByRole('textbox', { name: 'Question', exact: true }).fill('What protected places are nearby?');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  const answer = page.getByRole('region', { name: 'Answer for this place' });
+  await expect(answer).toContainText('Synthetic coastal preserve');
+  await expect(answer.getByRole('link', { name: 'Florida conservation lands ↗' }).first()).toHaveAttribute('href', /ca.dep.state.fl.us/);
+  await expect(page.locator('.askfoot input')).toBeInViewport(); await axe(page);
+  await page.getByRole('button', { name: 'Water & Weather', exact: true }).click(); await expect(answer).toHaveCount(0);
+});
 
 test('Ask returns cited evidence, focuses the answer and clears it on a new selected point', async ({ page }) => {
   await selectTyped(page);

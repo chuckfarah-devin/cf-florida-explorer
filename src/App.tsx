@@ -12,6 +12,7 @@ import { checkPoint, type LatLon } from './config/bounds';
 import type { MapHandle } from './map/arcgis';
 import type { TideStationMarker } from './map/noaaStations';
 import type { TideRequest } from './noaa/types';
+import type { NatureMapFeature } from './map/natureFeature';
 
 type Rec<T> = Record<ReferenceLayerId, T>;
 const allOff = Object.fromEntries(REFERENCE_LAYERS.map((l) => [l.id, false])) as Rec<boolean>;
@@ -41,17 +42,26 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
   const api = useRef<MapApi | null>(null);
   const currentSelection = useRef(sel.current);
   const tideMarkers = useRef<TideStationMarker[]>([]);
+  const highlightedNature = useRef<NatureMapFeature | null>(null);
+  const clearNatureHighlight = useCallback(() => {
+    highlightedNature.current = null;
+    handle.current?.clearNatureFeature?.();
+  }, []);
+  const showNatureFeature = useCallback((feature: NatureMapFeature) => {
+    highlightedNature.current = feature;
+    handle.current?.showNatureFeature?.(feature);
+  }, []);
   const showTideStations = useCallback((stations: TideStationMarker[]) => {
     tideMarkers.current = stations;
     handle.current?.setTideStations?.(stations);
   }, []);
 
   const select = useCallback((point: LatLon, source: 'pointer' | 'keyboard' | 'typed' | 'search', placeName?: string) => {
-    if (checkPoint(point).ok) { showTideStations([]); setAskState(null); }
+    if (checkPoint(point).ok) { showTideStations([]); clearNatureHighlight(); setAskState(null); }
     dispatch({ type: 'select', point, source, placeName });
-  }, [showTideStations]);
+  }, [showTideStations, clearNatureHighlight]);
   const changeDomain = (next: DomainId) => {
-    if (next !== domain) { showTideStations([]); setAskState(null); }
+    if (next !== domain) { showTideStations([]); clearNatureHighlight(); setAskState(null); }
     setDomain(next);
   };
 
@@ -71,6 +81,7 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
         const selected = currentSelection.current;
         h.setMarker(selected?.point ?? null);
         if (selected && selected.source !== 'pointer') h.goTo(selected.point);
+        if (highlightedNature.current) h.showNatureFeature?.(highlightedNature.current);
       }
     }).catch(() => setMapError('The map could not load. You can still enter coordinates in the search box.'));
     return () => { cancelled = true; handle.current?.destroy(); handle.current = null; };
@@ -91,7 +102,7 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
   };
 
   const scopeKey = askScopeKey(sel.current, askWindow, domain);
-  const activeAnswer = askState?.scopeKey === scopeKey && domain === 'water' ? askState : null;
+  const activeAnswer = askState?.scopeKey === scopeKey && (domain === 'water' || domain === 'nature') ? askState : null;
   const devBasemap = !import.meta.env.VITE_ARCGIS_API_KEY;
 
   return (
@@ -123,7 +134,7 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
             onSelectCenter={() => handle.current && select(handle.current.center(), 'keyboard')} />
         </div>
         <aside className="panel" aria-label="This place">
-          <div className="pscroll"><AskAnswer state={activeAnswer} onClose={() => setAskState(null)} /><PlacePanel selection={sel.current} domain={domain} onStations={showTideStations} onWindow={applyAskWindow} /></div>
+          <div className="pscroll"><AskAnswer state={activeAnswer} onClose={() => setAskState(null)} /><PlacePanel selection={sel.current} domain={domain} onStations={showTideStations} onWindow={applyAskWindow} onShowFeature={showNatureFeature} onClearFeature={clearNatureHighlight} /></div>
           <AskThisPlace key={scopeKey} selection={sel.current} window={askWindow} domain={domain} scopeKey={scopeKey} onState={setAskState} />
         </aside>
       </main>

@@ -1,5 +1,9 @@
 # Decisions and approval gates
 
+## 2026-11-04/05 — I3b nature authorization and resumed work
+
+Chuck approved the recommended Nature step (“ok that sounds good”): exact wetlands/conservation/aquatic-preserve lookups, nearby protected places with boundary distances and Show on map, then checked nature answers. Work resumed November 5 after the usage interruption. The default nearby search is a disclosed provisional 5 km radius with up to five distinct name/agency results; owner review can revise it. No sightings, species presence, habitat prediction, model integration, merges or deployment are authorized. See [I3b record](i3b-nature-implementation.md). Earlier scope restrictions below are historical and superseded only for this bounded increment.
+
 ## 2026-11-04 — I4 template-first authorization
 
 Chuck approved the recommended next step (“i agree....lets do it”): Ask This Place with checked FEMA/NOAA templates and readable citations, before nature. No model/provider is needed or selected. Applied dates/reference bind the answer; drafts do not. See [I4 record](i4-checked-answers.md). Merges, deployment, broader model routing and nature facts remain separately gated.

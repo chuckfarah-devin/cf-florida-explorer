@@ -6,9 +6,11 @@ import { FloodCard } from './FloodCard';
 import { TideCard } from './TideCard';
 import type { TideStationMarker } from '../map/noaaStations';
 import type { TideRequest } from '../noaa/types';
+import { NatureCard } from './NatureCard';
+import type { NatureFeature } from '../nature/types';
 
 /** Shows only what is known in I1: the selected spot. Facts arrive in later, separately approved increments. */
-export function PlacePanel({ selection, domain, onStations, onWindow }: { selection: Selection | null; domain: DomainId; onStations?: (stations: TideStationMarker[]) => void; onWindow?: (window: TideRequest) => void }) {
+export function PlacePanel({ selection, domain, onStations, onWindow, onShowFeature, onClearFeature }: { selection: Selection | null; domain: DomainId; onStations?: (stations: TideStationMarker[]) => void; onWindow?: (window: TideRequest) => void; onShowFeature?: (feature: NatureFeature) => void; onClearFeature?: () => void }) {
   const [showExact, setShowExact] = useState(false);
   if (!selection) {
     return (
@@ -30,12 +32,7 @@ export function PlacePanel({ selection, domain, onStations, onWindow }: { select
       {showExact && <p className="coords">{formatLatLon(selection.point)}</p>}
       {domain === 'water' && <FloodCard selection={selection} />}
       {domain === 'water' && <TideCard selection={selection} onStations={onStations} onWindow={onWindow} />}
-      {domain === 'nature' && <div className="pending card">
-        <h3>Nature nearby</h3>
-        <p className="muted">
-          Turn on wetlands, conservation areas, aquatic preserves or shoreline under Map layers to look around. Nearby-place details come in a later step.
-        </p>
-      </div>}
+      {domain === 'nature' && <NatureCard selection={selection} onShowFeature={onShowFeature} onClearFeature={onClearFeature} />}
     </div>
   );
 }

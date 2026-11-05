@@ -4,31 +4,10 @@ import type { FemaResult } from '../src/fema/types.ts';
 import type { TideRequest, TideResponse } from '../src/noaa/types.ts';
 import { createFemaService } from './fema.ts';
 import { createNoaaService, tideWindow } from './noaa.ts';
-
-type EvidenceClass = 'regulatory_classification' | 'measured_observation' | 'predicted_tide';
-type Value = string | number | null;
-export interface AnswerSource { ref: string; label: string; url: string; retrievedAtUtc: string; kind: EvidenceClass; stationId?: string; fields: Record<string, Value> }
-export interface Claim { type: 'zone' | 'observed_max' | 'predicted_high'; evidenceClass: EvidenceClass; citations: string[]; facts: { ref: string; field: string; value: Value }[] }
-const allowed = {
-  zone: { kind: 'regulatory_classification', fields: ['zone', 'subtype'] },
-  observed_max: { kind: 'measured_observation', fields: ['stationId', 'stationName', 'value', 'timeUtc', 'units', 'datum', 'quality', 'flags', 'samples'] },
-  predicted_high: { kind: 'predicted_tide', fields: ['stationId', 'stationName', 'value', 'timeUtc', 'units', 'datum'] },
-} as const;
-
-/** Only allow-listed facts exactly equal to this frozen pack may reach a template. */
-export function validateClaim(claim: Claim, sources: AnswerSource[]): boolean {
-  if (!Object.hasOwn(allowed, claim.type)) return false;
-  const rule = allowed[claim.type];
-  if (!rule || claim.evidenceClass !== rule.kind || claim.citations.length !== 1) return false;
-  const source = sources.find((s) => s.ref === claim.citations[0]);
-  if (!source || source.kind !== rule.kind || claim.facts.length !== rule.fields.length) return false;
-  if (claim.type !== 'zone' && (source.stationId !== source.fields.stationId || source.fields.units !== 'ft' || !['MLLW', 'NAVD'].includes(String(source.fields.datum)))) return false;
-  return rule.fields.every((field) => claim.facts.filter((f) => f.ref === source.ref && f.field === field && f.value === source.fields[field]).length === 1);
-}
-function immutable<T>(value: T): T {
-  if (value && typeof value === 'object') { Object.freeze(value); for (const item of Object.values(value)) immutable(item); }
-  return value;
-}
+import { CLAIM_RULES as allowed, validateClaim, immutable, type Value, type AnswerSource, type Claim } from './claim-validation.ts';
+import { createNatureAnswerService } from './nature-answer.ts';
+export { validateClaim } from './claim-validation.ts';
+export type { AnswerSource, Claim } from './claim-validation.ts';
 function exactQuery(url: string, point: LatLon) {
   const u = new URL(url); const p = u.searchParams;
   return u.origin === 'https://hazards.fema.gov' && u.pathname === '/arcgis/rest/services/public/NFHL/MapServer/28/query' && p.get('geometry') === `${point.lon},${point.lat}` && p.get('inSR') === '4326' && p.get('spatialRel') === 'esriSpatialRelIntersects' && !p.has('distance');
@@ -72,8 +51,10 @@ function renderClaim(c: Claim, s: AnswerSource): string | null {
 interface Options { fema?: Pick<ReturnType<typeof createFemaService>, 'lookup'>; noaa?: Pick<ReturnType<typeof createNoaaService>, 'lookup'>; now?: () => number }
 export function createAskService(options: Options = {}) {
   const fema = options.fema ?? createFemaService(); const noaa = options.noaa ?? createNoaaService(); const now = options.now ?? Date.now;
+  const nature = createNatureAnswerService({ now });
   return {
-    async answer(point: LatLon, selectionId: number, question: string, window: TideRequest) {
+    async answer(point: LatLon, selectionId: number, question: string, window: TideRequest, domain: 'water' | 'nature' = 'water') {
+      if (domain === 'nature') return nature.answer(point, selectionId, question, window);
       const intent = questionIntent(question, window);
       const sources: AnswerSource[] = []; const candidates: Claim[] = []; const limitations: string[] = [];
       const statuses: { source: string; state: string }[] = [];
@@ -145,7 +126,7 @@ export function createAskService(options: Options = {}) {
         return text ? [{ id: `F${i + 1}`, text, evidenceClass: candidate.evidenceClass, citations: candidate.citations, facts: candidate.facts }] : [];
       });
       if (!findings.length && intent !== 'unsupported') limitations.push('No supported factual finding is available from the retrieved records. Try again or inspect the source cards.');
-      return immutable({ selectionId, point: structuredClone(point), window: structuredClone(window), question, packId, createdAtUtc: new Date(now()).toISOString(), mode: 'template' as const, intent, supported: findings.length > 0, findings, limitations: [...new Set(limitations)], sources: pack.sources, statuses: structuredClone(statuses) });
+      return immutable({ domain: 'water' as const, selectionId, point: structuredClone(point), window: structuredClone(window), question, packId, createdAtUtc: new Date(now()).toISOString(), mode: 'template' as const, intent, supported: findings.length > 0, findings, limitations: [...new Set(limitations)], sources: pack.sources, statuses: structuredClone(statuses) });
     },
   };
 }

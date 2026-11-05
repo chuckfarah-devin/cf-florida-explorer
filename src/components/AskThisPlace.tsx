@@ -6,8 +6,11 @@ import type { AskResponse } from '../ask/types';
 import { fetchAnswer } from '../ask/client';
 import { formatLatLon } from '../config/bounds';
 
-const SUGGESTIONS = ['What does FEMA say about flooding here?', 'What were the water levels during this period?', 'What can these records tell us about the flooding I saw?'];
-export interface AskUiState { scopeKey: string; question?: string; response?: AskResponse; pending?: boolean; failed?: boolean }
+const SUGGESTIONS = {
+  water: ['What does FEMA say about flooding here?', 'What were the water levels during this period?', 'What can these records tell us about the flooding I saw?'],
+  nature: ['What is mapped at this spot?', 'What protected places are nearby?', 'Is this spot in a mapped wetland or aquatic preserve?'],
+};
+export interface AskUiState { scopeKey: string; domain?: 'water' | 'nature'; question?: string; response?: AskResponse; pending?: boolean; failed?: boolean }
 export function askScopeKey(selection: Selection | null, window: TideRequest, domain: DomainId) {
   return `${selection?.selectionId ?? 0}/${selection?.point.lat ?? ''}/${selection?.point.lon ?? ''}/${window.startDate}/${window.endDate}/${window.datum}/${domain}`;
 }
@@ -21,7 +24,8 @@ export function AskThisPlace({ selection, window, domain, scopeKey, onState, loo
   const [pending, setPending] = useState(false);
   const controller = useRef<AbortController | null>(null);
   const sequence = useRef(0);
-  const canAsk = !!selection && domain === 'water';
+  const canAsk = !!selection && (domain === 'water' || domain === 'nature');
+  const askDomain = domain === 'nature' ? 'nature' : 'water';
   useEffect(() => () => { sequence.current++; controller.current?.abort(); }, []);
   async function submit(text: string) {
     const value = text.trim();
@@ -29,12 +33,12 @@ export function AskThisPlace({ selection, window, domain, scopeKey, onState, loo
     setQuestion(value); controller.current?.abort();
     const abort = new AbortController(); controller.current = abort;
     const attempt = ++sequence.current;
-    setPending(true); onState({ scopeKey, pending: true, question: value });
+    setPending(true); onState({ scopeKey, domain: askDomain, pending: true, question: value });
     try {
-      const response = await lookup(selection, window, value, abort.signal);
-      if (attempt === sequence.current && !abort.signal.aborted) onState({ scopeKey, question: value, response });
+      const response = await lookup(selection, window, value, abort.signal, askDomain);
+      if (attempt === sequence.current && !abort.signal.aborted) onState({ scopeKey, domain: askDomain, question: value, response });
     } catch {
-      if (attempt === sequence.current && !abort.signal.aborted) onState({ scopeKey, question: value, failed: true });
+      if (attempt === sequence.current && !abort.signal.aborted) onState({ scopeKey, domain: askDomain, question: value, failed: true });
     } finally { if (attempt === sequence.current) setPending(false); }
   }
   return <section className="askfoot" aria-labelledby="ask-title">
@@ -44,7 +48,7 @@ export function AskThisPlace({ selection, window, domain, scopeKey, onState, loo
       <input id="ask-input" value={question} maxLength={500} disabled={!canAsk} onChange={(e) => setQuestion(e.target.value)} placeholder={canAsk ? 'Ask about this spot…' : 'Select a place to ask about it…'} />
       <button type="submit" className="btn" disabled={!canAsk || !question.trim()}>{pending ? 'Ask again' : 'Ask'}</button>
     </form>
-    <p id="ask-note" className="ask-note">{!selection ? 'Select a Florida place to ask a question.' : domain !== 'water' ? 'Answers currently cover Water & Weather. Switch tabs to ask.' : `${formatLatLon(selection.point)} · ${window.startDate}–${window.endDate} · ${window.datum === 'NAVD' ? 'NAVD88' : 'MLLW'}. Checked FEMA and NOAA records.`}</p>
-    <div className="qa" role="group" aria-label="Example questions" tabIndex={0}>{SUGGESTIONS.map((q) => <button key={q} type="button" className="chip q" disabled={!canAsk} onClick={() => void submit(q)}>{q}</button>)}</div>
+    <p id="ask-note" className="ask-note">{!selection ? 'Select a Florida place to ask a question.' : domain === 'nature' ? `${formatLatLon(selection.point)} · Mapped inventories; retrieval dates are not survey dates.` : domain !== 'water' ? 'Answers currently cover Water & Weather and Nature & Wildlife. Switch tabs to ask.' : `${formatLatLon(selection.point)} · ${window.startDate}–${window.endDate} · ${window.datum === 'NAVD' ? 'NAVD88' : 'MLLW'}. Checked FEMA and NOAA records.`}</p>
+    <div className="qa" role="group" aria-label="Example questions" tabIndex={0}>{SUGGESTIONS[askDomain].map((q) => <button key={q} type="button" className="chip q" disabled={!canAsk} onClick={() => void submit(q)}>{q}</button>)}</div>
   </section>;
 }

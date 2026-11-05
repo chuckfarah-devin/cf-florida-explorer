@@ -12,15 +12,16 @@ export function AskAnswer({ state, onClose }: { state: AskUiState | null; onClos
   }, [state]);
   if (!state?.question) return null;
   const answer = state.response;
+  const nature = (answer?.domain ?? state.domain) === 'nature';
   return <section className="card ask-answer" aria-label="Answer for this place" aria-busy={state.pending || false}>
     {onClose && !state.pending && <button type="button" className="linkbtn" onClick={onClose}>← Back to place</button>}
     <h2 ref={heading} tabIndex={-1}>About this place</h2>
     <p className="ask-question">{state.question}</p>
     {state.pending && <p role="status">Checking the source records for this place and period…</p>}
-    {state.failed && <p role="alert">The answer could not be prepared right now. Try asking again. This does not tell us whether this spot could flood.</p>}
+    {state.failed && <p role="alert">The answer could not be prepared right now. Try asking again. {nature ? 'This does not establish whether a mapped feature is present or absent.' : 'This does not tell us whether this spot could flood.'}</p>}
     {answer && <>
-      <p className="tide-caption">Source-based answer · {answer.window.startDate}–{answer.window.endDate} · {answer.window.datum === 'NAVD' ? 'NAVD88' : 'MLLW'}. Records retrieved for this answer may be newer than the cards below.</p>
-      {!answer.supported && <p>I can answer questions about the mapped FEMA flood classification and the selected NOAA tide period. I cannot answer this question from those records.</p>}
+      <p className="tide-caption">{nature ? 'Source-based map answer. Retrieval dates are not survey dates.' : `Source-based answer · ${answer.window.startDate}–${answer.window.endDate} · ${answer.window.datum === 'NAVD' ? 'NAVD88' : 'MLLW'}.`} Records retrieved for this answer may be newer than the cards below.</p>
+      {!answer.supported && <p>{nature ? 'I can summarize mapped wetlands, conservation land and aquatic preserves around this spot. These inventories do not establish wildlife sightings or species presence.' : 'I can answer questions about the mapped FEMA flood classification and the selected NOAA tide period.'} I cannot answer this question from those records.</p>}
       {answer.findings.map((finding) => <div key={finding.id} className="ask-finding"><p>{finding.text}</p><div className="ask-citations">{finding.citations.map((ref) => {
         const source = answer.sources.find((s) => s.ref === ref);
         return source ? <a key={ref} href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a> : null;

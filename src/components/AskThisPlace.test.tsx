@@ -8,6 +8,7 @@ import type { AskResponse } from '../ask/types';
 import type { Selection } from '../state/selection';
 import type { TideRequest } from '../noaa/types';
 import type { DomainId } from './Header';
+import type { fetchAnswer } from '../ask/client';
 
 const selection: Selection = { selectionId: 1, point: { lat: 26.5, lon: -80.05 }, source: 'typed' };
 const window: TideRequest = { startDate: '2026-10-25', endDate: '2026-10-29', datum: 'MLLW' };
@@ -17,7 +18,7 @@ const fixture = (question: string, id = 1): AskResponse => ({
   sources: [{ ref: 'E1', label: 'FEMA flood map', kind: 'regulatory_classification', url: 'https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?f=json', retrievedAtUtc: '2026-11-04T12:00:00Z' }],
 });
 const defaultLookup = vi.fn(async (_s: Selection, _w: TideRequest, q: string) => fixture(q));
-function Harness({ point = selection, period = window, domain = 'water', lookup = defaultLookup }: { point?: Selection | null; period?: TideRequest; domain?: DomainId; lookup?: typeof defaultLookup }) {
+function Harness({ point = selection, period = window, domain = 'water', lookup = defaultLookup }: { point?: Selection | null; period?: TideRequest; domain?: DomainId; lookup?: typeof fetchAnswer }) {
   const [state, setState] = useState<AskUiState | null>(null);
   const key = askScopeKey(point, period, domain);
   return <><AskAnswer state={state?.scopeKey === key ? state : null} /><AskThisPlace key={key} selection={point} window={period} domain={domain} scopeKey={key} onState={setState} lookup={lookup} /></>;
@@ -69,9 +70,24 @@ it('clears answers on applied period/domain changes and disables unsupported dom
   rerender(<Harness period={{ ...window, startDate: '2026-10-18' }} />);
   expect(screen.queryByRole('region', { name: 'Answer for this place' })).toBeNull();
   expect(screen.getByText(/2026-10-18–2026-10-29/)).toBeVisible();
-  rerender(<Harness domain="nature" />);
+  rerender(<Harness domain="history" />);
   expect(screen.getByRole('textbox', { name: 'Question' })).toBeDisabled();
   expect(screen.getByText(/Switch tabs to ask/)).toBeVisible();
   rerender(<Harness point={null} />);
   expect(screen.getByRole('button', { name: /^Ask$/ })).toBeDisabled();
+});
+
+it('offers source-backed nature questions and keeps tide dates out of the nature caption', async () => {
+  const lookup = vi.fn<typeof fetchAnswer>(async (_s, _w, question) => ({ ...fixture(question), domain: 'nature' as const, intent: 'nature' as const, findings: [{ id: 'nature', text: 'Synthetic mapped conservation area.', evidenceClass: 'mapped_feature' as const, citations: ['E1'] }], sources: [{ ...fixture('').sources[0], kind: 'mapped_feature', label: 'Florida conservation lands', url: 'https://ca.dep.state.fl.us/arcgis/rest/services/Map_Direct/Environment/MapServer/38/query' }] }));
+  render(<Harness domain="nature" lookup={lookup} />);
+  expect(screen.getByRole('textbox', { name: 'Question' })).toBeEnabled();
+  const footer = screen.getByRole('region', { name: 'Ask this place' });
+  expect(within(footer).getByText(/Mapped inventories; retrieval dates are not survey dates/)).toBeVisible();
+  expect(within(footer).queryByText(/2026-10-25/)).toBeNull();
+  await userEvent.click(screen.getByRole('button', { name: 'What protected places are nearby?' }));
+  expect(await screen.findByText('Synthetic mapped conservation area.')).toBeVisible();
+  expect(lookup.mock.calls[0][4]).toBe('nature');
+  const answer = screen.getByRole('region', { name: 'Answer for this place' });
+  expect(within(answer).getByText(/Source-based map answer/)).toBeVisible();
+  expect(within(answer).queryByText(/MLLW/)).toBeNull();
 });
