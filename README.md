@@ -5,7 +5,7 @@ Select a place. Explore its story. Follow the evidence.
 Independent Florida Explorer documentation workspace.
 Repository: [cf-florida-explorer](https://github.com/chuckfarah-devin/cf-florida-explorer), separate from `cf-ai-infrastructure-analyzer`.
 
-Status as of 2026-11-04: I1/C7 and I2 are proposed in PRs #2/#3. I3 adds bounded NOAA station comparisons. Chuck authorized template-first Ask This Place; see [I4 record](docs/i4-checked-answers.md). Model routing, nature fact lookups, merging and deployment require separate approval.
+Status as of 2026-11-05: Water & Weather and checked Ask answers are in stacked review PRs. Chuck authorized I3b nature facts and nature answers; see [Nature implementation](docs/i3b-nature-implementation.md). Model routing, wildlife sightings/habitat models, merging and deployment remain separately gated.
 
 ## Reading order
 
@@ -31,9 +31,10 @@ npm run dev        # local dev server
 npm run lint && npm run typecheck && npm test && npm run build
 ```
 
-The Vite development and preview servers serve `/api/fema`, `/api/noaa` and `/api/ask` locally. For the built frontend plus local API, run `npm run build` then `npm start` (default http://localhost:4173; `PORT` changes the port). Use localhost if that is the hostname permitted by your ArcGIS key. An HTTPS reverse proxy must explicitly configure `PUBLIC_ORIGIN` to its exact frontend origin; forwarded protocol headers are not trusted. No hosting provider or deployment is selected.
+The Vite development and preview servers serve `/api/fema`, `/api/noaa`, `/api/nature` and `/api/ask` locally. For the built frontend plus local API, run `npm run build` then `npm start` (default http://localhost:4173; `PORT` changes the port). Use localhost if that is the hostname permitted by your ArcGIS key. An HTTPS reverse proxy must explicitly configure `PUBLIC_ORIGIN` to its exact frontend origin; forwarded protocol headers are not trusted. No hosting provider or deployment is selected.
 
 FEMA requests need no API key. A static-files-only server cannot run the API: it must use the portable handler or the provided local Node server. Server runtime is Node 24.15+ and uses native TypeScript stripping; no production server dependency is added.
 
 `npm run test:a11y` checks the built frontend with synthetic FEMA responses and blocked upstream map/data services. `node scripts/fema-smoke.mjs` separately probes public FEMA services at the two documented Briny Breezes points and writes ignored output under scripts/out/. Synthetic tests and screenshots do not validate the October 2026 flooding event.
+
 

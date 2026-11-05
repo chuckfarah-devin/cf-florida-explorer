@@ -55,7 +55,7 @@ export function LayerPanel({ enabled, status, onToggle, onRetry, onClose }: Prop
           );
         })}
       </ul>
-      <p className="lnote">Layers help you look around. FEMA classification comes from a separate server lookup for your selected point, not from the shading. Nature layers remain display-only.</p>
+      <p className="lnote">Layers help you look around. Flood and nature facts come from separate source lookups for your selected point, not from the map shading.</p>
     </section>
   );
 }

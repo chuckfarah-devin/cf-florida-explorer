@@ -7,6 +7,13 @@ function fakeService() {
   return { answer: vi.fn(async () => ({ selectionId: 7, point: { lat: body.lat, lon: body.lon }, window: { startDate: body.startDate, endDate: body.endDate, datum: 'MLLW' as const }, packId: 'synthetic-pack', createdAtUtc: '2026-11-04T12:00:00Z', question: body.question, mode: 'template' as const, intent: 'flood' as const, findings: [], limitations: [], sources: [], statuses: [], supported: false })) };
 }
 describe('Ask API request boundary', () => {
+  it('dispatches an explicit nature domain and rejects unknown domains', async () => {
+    const service = fakeService(); const handler = createAskHandler(service);
+    expect((await handler(request({ ...body, domain: 'nature' }))).status).toBe(200);
+    expect(service.answer.mock.calls[0]).toHaveLength(5);
+    expect((await handler(request({ ...body, domain: 'untrusted' }))).status).toBe(400);
+    expect(service.answer).toHaveBeenCalledTimes(1);
+  });
   it('passes only the bound point, selection, question and applied dates to the server-owned service', async () => {
     const service = fakeService(); const response = await createAskHandler(service)(request());
     expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');

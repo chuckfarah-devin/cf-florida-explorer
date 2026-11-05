@@ -72,6 +72,62 @@ async function setup() {
 }
 
 describe('ArcGIS layer lifecycle', () => {
+  const natureFeature = { id: 'protected-1', name: 'Synthetic protected place', geometry: { rings: [[[-80.06, 26.50], [-80.05, 26.50], [-80.05, 26.51], [-80.06, 26.50]]], spatialReference: { wkid: 4326 as const } } };
+
+  it('highlights the supplied polygon and fits it without changing the selected evidence point', async () => {
+    const { handle, onClick } = await setup();
+    const marker = sdk.layers[0];
+    handle.setMarker({ lat: 26.508, lon: -80.054 });
+    const before = marker.add.mock.calls.length;
+    handle.showNatureFeature!(natureFeature);
+    const highlight = sdk.layers.find((l) => (l as unknown as { title: string }).title === 'Highlighted nature area')!;
+    const graphic = highlight.add.mock.calls[0][0];
+    expect(graphic.geometry.rings).toEqual(natureFeature.geometry.rings);
+    expect(graphic.geometry.rings).not.toBe(natureFeature.geometry.rings);
+    expect(graphic.geometry.spatialReference).toEqual({ wkid: 4326 });
+    expect(graphic.popupTemplate.content.textContent).toContain('selected spot is unchanged');
+    await vi.waitFor(() => expect(sdk.goTo).toHaveBeenCalledWith(graphic));
+    expect(marker.add).toHaveBeenCalledTimes(before);
+    expect(onClick).not.toHaveBeenCalled();
+    handle.destroy();
+  });
+
+  it('keeps only the newest queued nature highlight, and clearing or selecting cancels navigation', async () => {
+    let ready!: () => void;
+    sdk.ready.mockReturnValue(new Promise<void>((resolve) => { ready = resolve; }));
+    const { handle } = await setup();
+    handle.showNatureFeature!(natureFeature);
+    handle.showNatureFeature!({ ...natureFeature, id: 'protected-2' });
+    ready();
+    await vi.waitFor(() => expect(sdk.goTo).toHaveBeenCalledOnce());
+    expect(sdk.goTo).toHaveBeenCalledWith(expect.objectContaining({ attributes: { natureFeatureId: 'protected-2' } }));
+    sdk.goTo.mockClear();
+    handle.showNatureFeature!(natureFeature);
+    handle.clearNatureFeature!();
+    await Promise.resolve();
+    expect(sdk.goTo).not.toHaveBeenCalled();
+    handle.showNatureFeature!(natureFeature);
+    handle.setMarker({ lat: 26.51, lon: -80.05 });
+    await Promise.resolve();
+    expect(sdk.goTo).not.toHaveBeenCalled();
+    handle.showNatureFeature!(natureFeature);
+    handle.destroy();
+    await Promise.resolve();
+    expect(sdk.goTo).not.toHaveBeenCalled();
+  });
+
+  it('rejects missing, unclosed or invalid-coordinate geometry rather than highlighting a different place', async () => {
+    const { handle } = await setup();
+    const highlight = sdk.layers.find((l) => (l as unknown as { title: string }).title === 'Highlighted nature area')!;
+    handle.showNatureFeature!({ id: 'none', name: 'No geometry' });
+    handle.showNatureFeature!({ ...natureFeature, geometry: { ...natureFeature.geometry, rings: [[[-80, 26], [-80, 27], [-81, 27], [-82, 28]]] } });
+    handle.showNatureFeature!({ ...natureFeature, geometry: { ...natureFeature.geometry, rings: [[[-80, 26], [-80, 27], [NaN, 27], [-80, 26]]] } });
+    await Promise.resolve();
+    expect(highlight.add).not.toHaveBeenCalled();
+    expect(sdk.goTo).not.toHaveBeenCalled();
+    handle.destroy();
+  });
+
   it('waits for view readiness and navigates only to the newest requested point', async () => {
     let ready!: () => void;
     const pending = new Promise<void>((resolve) => { ready = resolve; });

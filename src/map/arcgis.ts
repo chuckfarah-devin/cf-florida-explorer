@@ -4,10 +4,13 @@ import type { ReferenceLayerConfig, LayerStatus } from '../config/layers';
 import type { PlaceCandidate } from '../components/SearchBox';
 import { layersForFailedUrl } from './layerErrors';
 import { stationLabel, type TideStationMarker } from './noaaStations';
+import { validNatureGeometry, type NatureMapFeature } from './natureFeature';
 
 export interface MapHandle {
   setMarker: (p: LatLon | null) => void;
   setTideStations?: (stations: TideStationMarker[]) => void;
+  showNatureFeature?: (feature: NatureMapFeature) => void;
+  clearNatureFeature?: () => void;
   goTo: (p: LatLon) => void;
   center: () => LatLon;
   zoom: (delta: number) => void;
@@ -63,6 +66,8 @@ export async function createMap(
     map.add(layer);
   }
   map.add(tideStations);
+  const natureHighlight = new GraphicsLayer({ title: 'Highlighted nature area', listMode: 'hide' });
+  map.add(natureHighlight);
   map.add(marker);
   const view = new MapView({
     container, map, center: [-81.6, 27.8], zoom: 6,
@@ -126,8 +131,26 @@ export async function createMap(
     setMarker(p) {
       clickSequence++;
       navigationSequence++;
+      natureHighlight.removeAll();
       marker.removeAll();
       if (p) marker.add(new Graphic({ geometry: { type: 'point', latitude: p.lat, longitude: p.lon }, symbol: { type: 'simple-marker', color: '#e2603f', size: 16, outline: { color: '#ffffff', width: 2.5 } } }));
+    },
+    showNatureFeature(feature) {
+      if (destroyed || !validNatureGeometry(feature)) return;
+      const sequence = ++navigationSequence;
+      const geometry = { type: 'polygon' as const, rings: feature.geometry!.rings.map((ring) => ring.map((p) => [...p])), spatialReference: { wkid: 4326 } };
+      const content = document.createElement('p');
+      content.textContent = `${feature.name}. This is a mapped area, not a surveyed boundary or a guarantee of public access. Your selected spot is unchanged.`;
+      const graphic = new Graphic({ geometry, symbol: { type: 'simple-fill', color: [70, 134, 76, 0.16], outline: { color: '#245d31', width: 3 } }, attributes: { natureFeatureId: feature.id }, popupTemplate: { title: 'Mapped nature area', content } });
+      natureHighlight.removeAll(); natureHighlight.add(graphic);
+      void view.when().then(() => {
+        if (!destroyed && sequence === navigationSequence) return view.goTo(graphic);
+      }).catch(() => undefined);
+    },
+    clearNatureFeature() {
+      if (destroyed) return;
+      navigationSequence++;
+      natureHighlight.removeAll();
     },
     setTideStations(stations) {
       if (destroyed) return;
@@ -161,7 +184,12 @@ export async function createMap(
       }).catch(() => undefined);
     },
     center() { return { lat: view.center.latitude ?? 0, lon: view.center.longitude ?? 0 }; },
-    zoom(delta) { void view.goTo({ zoom: view.zoom + delta }).catch(() => undefined); },
+    zoom(delta) {
+      const sequence = ++navigationSequence;
+      void view.when().then(() => {
+        if (!destroyed && sequence === navigationSequence) return view.goTo({ zoom: view.zoom + delta });
+      }).catch(() => undefined);
+    },
     setLayerVisible(id, visible) {
       const l = layerById.get(id); if (!l) return;
       l.visible = visible;
