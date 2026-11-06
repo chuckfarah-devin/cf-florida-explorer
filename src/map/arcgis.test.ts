@@ -6,6 +6,8 @@ const sdk = vi.hoisted(() => {
   const ready = vi.fn(() => Promise.resolve());
   const makeLegend = vi.fn();
   const goTo = vi.fn(() => Promise.resolve());
+  const loadBasemap = vi.fn(() => Promise.resolve());
+  const setBasemap = vi.fn();
   const hitTest = vi.fn(() => Promise.resolve({ results: [] as object[] }));
   const clicks: ((event: object) => Promise<void>)[] = [];
   class FakeLayer {
@@ -17,6 +19,8 @@ const sdk = vi.hoisted(() => {
     add = vi.fn();
   }
   class FakeMap {
+    basemap = { loadAll: loadBasemap };
+    set = setBasemap;
     layers = { indexOf: () => 0 };
     add() {}
     remove() {}
@@ -34,7 +38,7 @@ const sdk = vi.hoisted(() => {
     destroy = vi.fn();
     constructor({ container, aria }: { container: HTMLElement; aria: { label: string } }) { surface.className = 'esri-view-surface'; surface.setAttribute('role', 'application'); surface.setAttribute('aria-label', aria.label); container.append(surface); }
   }
-  return { layers, ready, makeLegend, goTo, hitTest, clicks, FakeLayer, FakeMap, FakeView, surface, config: { request: { interceptors: [] as { error: (err: { details: { url: string } }) => void }[] } } };
+  return { layers, ready, makeLegend, goTo, loadBasemap, setBasemap, hitTest, clicks, FakeLayer, FakeMap, FakeView, surface, config: { request: { interceptors: [] as { error: (err: { details: { url: string } }) => void }[] } } };
 });
 vi.mock('@arcgis/core/config.js', () => ({ default: sdk.config }));
 vi.mock('@arcgis/core/Map.js', () => ({ default: sdk.FakeMap }));
@@ -49,6 +53,9 @@ vi.mock('@arcgis/core/widgets/Legend.js', () => ({ default: class { constructor(
 import { createMap, MAP_LABEL } from './arcgis';
 
 afterEach(() => {
+  vi.unstubAllEnvs();
+  sdk.loadBasemap.mockReset().mockResolvedValue(undefined);
+  sdk.setBasemap.mockReset();
   sdk.ready.mockReset().mockResolvedValue(undefined);
   sdk.makeLegend.mockReset();
   sdk.goTo.mockClear();
@@ -64,14 +71,23 @@ async function setup() {
   const onLayerStatus = vi.fn();
   const onEnter = vi.fn();
   const onClick = vi.fn();
-  const handle = await createMap(document.createElement('div'), REFERENCE_LAYERS, { onClick, onEnter, onLayerStatus });
+  const onBasemapFallback = vi.fn();
+  const handle = await createMap(document.createElement('div'), REFERENCE_LAYERS, { onClick, onEnter, onLayerStatus, onBasemapFallback });
   const layer = sdk.layers[4]; // Selected place + tide graphics layers, wetlands, conservation, aquatic preserves.
   const config = REFERENCE_LAYERS.find((l) => l.id === 'aquatic-preserves')!;
   const fail = () => sdk.config.request.interceptors[0].error({ details: { url: `${config.serviceUrl}/0/query` } });
-  return { handle, layer, onLayerStatus, onEnter, onClick, fail };
+  return { handle, layer, onLayerStatus, onEnter, onClick, onBasemapFallback, fail };
 }
 
 describe('ArcGIS layer lifecycle', () => {
+  it('falls back to OpenStreetMap and announces it when the ArcGIS basemap fails', async () => {
+    vi.stubEnv('VITE_ARCGIS_API_KEY', 'synthetic-key');
+    sdk.loadBasemap.mockRejectedValue(new Error('Token invalid'));
+    const { handle, onBasemapFallback } = await setup();
+    await vi.waitFor(() => expect(onBasemapFallback).toHaveBeenCalledOnce());
+    expect(sdk.setBasemap).toHaveBeenCalledWith('basemap', 'osm');
+    handle.destroy();
+  });
   it('provides drainage feature popups and preserves the selected point when inspecting them', async () => {
     const { handle, onClick } = await setup();
     for (const id of ['watersheds', 'canals', 'water-structures']) {

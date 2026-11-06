@@ -27,7 +27,7 @@ const GEOCODE_URL = 'https://geocode-api.arcgis.com/arcgis/rest/services/World/G
 export async function createMap(
   container: HTMLDivElement,
   layers: readonly ReferenceLayerConfig[],
-  handlers: { onClick: (p: LatLon) => void; onEnter: () => void; onLayerStatus: (id: string, s: LayerStatus) => void },
+  handlers: { onClick: (p: LatLon) => void; onEnter: () => void; onLayerStatus: (id: string, s: LayerStatus) => void; onBasemapFallback?: () => void },
 ): Promise<MapHandle> {
   const [{ default: esriConfig }, { default: EsriMap }, { default: MapView }, { default: Graphic }, { default: GraphicsLayer }, { default: FeatureLayer }, { default: MapImageLayer }, reactiveUtils, { default: Legend }] =
     await Promise.all([
@@ -56,6 +56,12 @@ export async function createMap(
   const marker = new GraphicsLayer({ title: 'Selected place', listMode: 'hide' });
   const tideStations = new GraphicsLayer({ title: 'NOAA tide stations', listMode: 'hide' });
   const map = new EsriMap({ basemap: apiKey ? 'arcgis/light-gray' : 'osm' });
+  const originalBasemap = map.basemap;
+  if (apiKey && originalBasemap) void originalBasemap.loadAll().catch(() => {
+    if (destroyed || map.basemap !== originalBasemap) return;
+    map.set('basemap', 'osm');
+    handlers.onBasemapFallback?.();
+  });
   const layerById = new Map<string, InstanceType<typeof FeatureLayer> | InstanceType<typeof MapImageLayer>>();
   const makeLayer = (cfg: ReferenceLayerConfig) => cfg.render === 'feature'
     ? new FeatureLayer({ url: `${cfg.serviceUrl}/${cfg.sublayerId}`, visible: false, opacity: cfg.popupFields ? 0.9 : 0.55, title: cfg.label, outFields: cfg.popupFields ? cfg.popupFields.map((f) => f.fieldName) : [],
