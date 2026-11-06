@@ -34,10 +34,13 @@ describe('App (I1)', () => {
     await user.clear(box);
     await user.type(box, '26.5084, -80.0546{Enter}');
     expect(handle.setMarker).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('switch', { name: 'Show Watersheds' }));
+    expect(handle.setLayerVisible).not.toHaveBeenCalled();
     await act(async () => { finish(handle); });
     await waitFor(() => expect(handle.setMarker).toHaveBeenLastCalledWith({ lat: 26.5084, lon: -80.0546 }));
     expect(handle.goTo).toHaveBeenCalledWith({ lat: 26.5084, lon: -80.0546 });
     expect(handle.goTo).not.toHaveBeenCalledWith({ lat: 26.5089, lon: -80.0522 });
+    expect(handle.setLayerVisible).toHaveBeenCalledWith('watersheds', true);
   });
   it('clears station graphics on accepted selections and domain changes', async () => {
     const user = userEvent.setup();

@@ -7,7 +7,7 @@ const root = resolve('dist');
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.woff2': 'font/woff2', '.png': 'image/png', '.gif': 'image/gif', '.svg': 'image/svg+xml' };
 const server = createServer(async (req, res) => {
   try {
-    if (['/api/fema', '/api/noaa', '/api/ask', '/api/nature'].includes(req.url?.split('?')[0])) { await serveFema(req, res); return; }
+    if (['/api/fema', '/api/noaa', '/api/ask', '/api/nature', '/api/wildlife', '/api/history', '/api/infrastructure'].includes(req.url?.split('?')[0])) { await serveFema(req, res); return; }
     if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405).end(); return; }
     const pathname = decodeURIComponent(new URL(req.url ?? '/', 'http://localhost').pathname);
     const file = resolve(root, `.${pathname === '/' ? '/index.html' : pathname}`);

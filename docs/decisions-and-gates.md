@@ -1,5 +1,9 @@
 # Decisions and approval gates
 
+## 2026-11-05/06 — expanded discovery and MVP publication
+
+Chuck authorized wildlife discovery and a personal day-planner concept, subsequently deferred further planner work, then authorized History and Land/drainage context and overlays. He requested miles, unique animal grouping/counts and a broader animal list. On November 6 he requested a spec check and push to GitHub as an MVP. These later instructions supersede earlier exclusions only for the delivered scope described in [MVP release](mvp-release.md). GitHub branch/PR publication is authorized; merging and public deployment remain unapproved. No analyzer changes or native Android work.
+
 ## 2026-11-04/05 — I3b nature authorization and resumed work
 
 Chuck approved the recommended Nature step (“ok that sounds good”): exact wetlands/conservation/aquatic-preserve lookups, nearby protected places with boundary distances and Show on map, then checked nature answers. Work resumed November 5 after the usage interruption. The default nearby search is a disclosed provisional 5 km radius with up to five distinct name/agency results; owner review can revise it. No sightings, species presence, habitat prediction, model integration, merges or deployment are authorized. See [I3b record](i3b-nature-implementation.md). Earlier scope restrictions below are historical and superseded only for this bounded increment.
