@@ -43,7 +43,7 @@ export function createNatureAnswerService(options: Options = {}) {
           const s = n.sources.find((s) => s.id === 'nearby')!; const exact = n.sources.find((s) => s.id === 'conservation')!;
           if (s.state !== 'ok') limitations.push('The nearby conservation-land search is unavailable. This does not establish that no protected places are nearby.');
           else {
-            limitations.push('The nearby search uses a provisional 5 km radius and lists up to five names. Distances estimate the nearest mapped boundary, not a route, entrance or surveyed separation.');
+            limitations.push('The nearby search uses a provisional 3.1 mi radius and lists up to five names. Distances estimate the nearest mapped boundary, not a route, entrance or surveyed separation.');
             if (!n.nearby.length) add('nature_empty', s, { count: 0 }, 'No protected-place boundary could be listed from the conservation-land map within this search radius. This does not prove there are no protected places on the ground.');
             for (const f of n.nearby) {
               const original = s.features.find((row) => row.id === f.id);
@@ -57,7 +57,7 @@ export function createNatureAnswerService(options: Options = {}) {
                 if (!hit) throw new Error('Unverified mapped membership'); match(exact, hit); continue;
               }
               if (f.distanceMeters! > NATURE_RADIUS) throw new Error('Outside nearby radius');
-              add('nature_nearby', s, { featureId: f.id, name: f.name, agency: f.agency ?? null, distanceMeters: f.distanceMeters!, bearing: f.bearing! }, `The mapped boundary of ${f.name} is about ${(f.distanceMeters! / 1000).toFixed(2)} km ${f.bearing} from your spot${f.agency ? `; managing agency: ${f.agency}` : ''}.`);
+              add('nature_nearby', s, { featureId: f.id, name: f.name, agency: f.agency ?? null, distanceMeters: f.distanceMeters!, bearing: f.bearing! }, `The mapped boundary of ${f.name} is about ${(f.distanceMeters! / 1609.344).toFixed(2)} mi ${f.bearing} from your spot${f.agency ? `; managing agency: ${f.agency}` : ''}.`);
             }
           }
         }

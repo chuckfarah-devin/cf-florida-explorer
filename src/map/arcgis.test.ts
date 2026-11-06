@@ -72,6 +72,22 @@ async function setup() {
 }
 
 describe('ArcGIS layer lifecycle', () => {
+  it('provides drainage feature popups and preserves the selected point when inspecting them', async () => {
+    const { handle, onClick } = await setup();
+    for (const id of ['watersheds', 'canals', 'water-structures']) {
+      const cfg = REFERENCE_LAYERS.find((l) => l.id === id)!;
+      const layer = sdk.layers.find((l) => (l as unknown as { title: string }).title === cfg.label)!;
+      expect(layer).toMatchObject({ popupTemplate: { title: cfg.label, content: [{ type: 'fields' }] } });
+      expect(layer).toMatchObject({ outFields: expect.arrayContaining(['NAME']) });
+      handle.setLayerVisible(id, true);
+    }
+    sdk.hitTest.mockResolvedValue({ results: [{}] });
+    await sdk.clicks[0]({ mapPoint: { latitude: 26.5, longitude: -80.05 } });
+    expect(onClick).not.toHaveBeenCalled();
+    const includes = (sdk.hitTest.mock.calls[0] as unknown as [unknown, { include: unknown[] }])[1].include;
+    expect(includes).toHaveLength(4);
+    handle.destroy();
+  });
   const natureFeature = { id: 'protected-1', name: 'Synthetic protected place', geometry: { rings: [[[-80.06, 26.50], [-80.05, 26.50], [-80.05, 26.51], [-80.06, 26.50]]], spatialReference: { wkid: 4326 as const } } };
 
   it('highlights the supplied polygon and fits it without changing the selected evidence point', async () => {

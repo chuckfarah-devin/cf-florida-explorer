@@ -8,13 +8,13 @@ export default defineConfig({
     name: 'florida-explorer-local-api',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        if (!['/api/fema', '/api/noaa', '/api/ask', '/api/nature'].includes(req.url?.split('?')[0] ?? '')) { next(); return; }
+        if (!['/api/fema', '/api/noaa', '/api/ask', '/api/nature', '/api/wildlife', '/api/history', '/api/infrastructure'].includes(req.url?.split('?')[0] ?? '')) { next(); return; }
         void serveFema(req, res).catch(() => { if (!res.headersSent) res.writeHead(500); res.end(); });
       });
     },
     configurePreviewServer(server) {
       server.middlewares.use((req, res, next) => {
-        if (!['/api/fema', '/api/noaa', '/api/ask', '/api/nature'].includes(req.url?.split('?')[0] ?? '')) { next(); return; }
+        if (!['/api/fema', '/api/noaa', '/api/ask', '/api/nature', '/api/wildlife', '/api/history', '/api/infrastructure'].includes(req.url?.split('?')[0] ?? '')) { next(); return; }
         void serveFema(req, res).catch(() => { if (!res.headersSent) res.writeHead(500); res.end(); });
       });
     },

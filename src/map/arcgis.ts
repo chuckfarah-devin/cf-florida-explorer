@@ -58,7 +58,12 @@ export async function createMap(
   const map = new EsriMap({ basemap: apiKey ? 'arcgis/light-gray' : 'osm' });
   const layerById = new Map<string, InstanceType<typeof FeatureLayer> | InstanceType<typeof MapImageLayer>>();
   const makeLayer = (cfg: ReferenceLayerConfig) => cfg.render === 'feature'
-    ? new FeatureLayer({ url: `${cfg.serviceUrl}/${cfg.sublayerId}`, visible: false, opacity: 0.55, title: cfg.label, outFields: [] })
+    ? new FeatureLayer({ url: `${cfg.serviceUrl}/${cfg.sublayerId}`, visible: false, opacity: cfg.popupFields ? 0.9 : 0.55, title: cfg.label, outFields: cfg.popupFields ? cfg.popupFields.map((f) => f.fieldName) : [],
+      ...(cfg.popupFields ? { popupTemplate: { title: cfg.label, content: [{ type: 'fields' as const, fieldInfos: cfg.popupFields.map((f) => ({ ...f })) }] } } : {}),
+      ...(cfg.id === 'watersheds' ? { renderer: { type: 'simple' as const, symbol: { type: 'simple-fill' as const, color: [145, 106, 48, 0.05], outline: { color: '#916a30', width: 2 } } } } : {}),
+      ...(cfg.id === 'canals' ? { minScale: 0, renderer: { type: 'simple' as const, symbol: { type: 'simple-line' as const, color: '#007a99', width: 2 } } } : {}),
+      ...(cfg.id === 'water-structures' ? { renderer: { type: 'simple' as const, symbol: { type: 'simple-marker' as const, style: 'square' as const, color: '#8f4574', size: 10, outline: { color: '#ffffff', width: 1 } } } } : {}),
+    })
     : new MapImageLayer({ url: cfg.serviceUrl, sublayers: [{ id: cfg.sublayerId, visible: true }], visible: false, opacity: 0.45, title: cfg.label });
   for (const cfg of layers) {
     const layer = makeLayer(cfg);
@@ -96,7 +101,7 @@ export async function createMap(
     const mp = e.mapPoint;
     // A station popup must not silently replace the user's selected place.
     try {
-      const hit = await view.hitTest(e, { include: [tideStations] });
+      const hit = await view.hitTest(e, { include: [tideStations, ...layers.filter((cfg) => cfg.popupFields && layerById.get(cfg.id)?.visible).map((cfg) => layerById.get(cfg.id)!)] });
       if (hit.results.length > 0) return;
     } catch { /* Normal point selection remains available if hit testing fails. */ }
     if (!destroyed && sequence === clickSequence && mp?.latitude != null && mp.longitude != null) handlers.onClick({ lat: mp.latitude, lon: mp.longitude });

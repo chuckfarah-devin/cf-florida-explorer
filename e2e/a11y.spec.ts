@@ -7,6 +7,56 @@ import { fileURLToPath } from 'node:url';
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 const SDK_ASSETS = fileURLToPath(new URL('../node_modules/@arcgis/core/assets/', import.meta.url));
 
+test('Land separates drainage context from an untraced outlet route and is accessible', async ({ page }) => {
+  await page.route('**/api/infrastructure', (r) => r.fulfill({ json: { sources: [{ id: 'watershed', label: 'Watershed at this point', state: 'ok', records: [{ name: 'LAKE WORTH LAGOON' }], queryUrl: 'https://geoweb.sfwmd.gov/', retrievedAt: '2026-11-05' }] } }));
+  await selectTyped(page);
+  await page.getByRole('button', { name: 'Land & Infrastructure', exact: true }).click();
+  for (const name of ['Show Watersheds', 'Show Canals & streams', 'Show Water-control structures']) {
+    await expect(page.getByRole('switch', { name, exact: true })).toHaveCount(1);
+  }
+  await expect(page.getByText('LAKE WORTH LAGOON')).toBeVisible();
+  await expect(page.getByText('Where does this drain go?')).toHaveCount(0);
+  await axe(page);
+  await page.setViewportSize({ width: 360, height: 800 });
+  await axe(page);
+  await page.screenshot({ path: 'scripts/out/infrastructure-mobile.png' });
+});
+
+test('History shows nearby state records with accessible mobile controls', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.route('**/api/history', (r) => r.fulfill({ json: { records: [{ id: 560, title: '1913 Boynton School', markerYear: '2007', city: 'Boynton Beach', county: 'Palm Beach', address: 'Ocean Avenue', excerpt: 'Synthetic browser fixture.', url: 'https://markers.flheritage.com/home/details/560', distanceKm: 2.5 }], retrievedAt: '2026-11-05' } }));
+  await selectTyped(page);
+  await page.getByRole('button', { name: 'History & Change', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '1913 Boynton School' })).toBeVisible();
+  await expect(page.getByText(/Marker year: 2007/)).toBeVisible();
+  await axe(page);
+  await page.screenshot({ path: 'scripts/out/history-mobile.png' });
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await axe(page);
+  await page.screenshot({ path: 'scripts/out/history-desktop.png' });
+});
+
+test('mobile wildlife interests and public day plan are accessible and persist', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.route('**/api/wildlife', (r) => r.fulfill({ json: { records: [{ id: 123, name: 'Bobcat', scientificName: 'Lynx rufus', observedOn: '2026-10-24', url: 'https://www.inaturalist.org/observations/123' }], radiusKm: 50, retrievedAt: '2026-11-05' } }));
+  await page.getByRole('searchbox').fill('26.1, -81.4');
+  await page.getByRole('searchbox').press('Enter');
+  await page.getByRole('button', { name: 'Nature & Wildlife', exact: true }).click();
+  await expect(page.getByText('Bobcat', { exact: true })).toBeVisible();
+  await page.getByLabel('Native status').selectOption('native');
+  await page.getByLabel('Animal group').selectOption('mammals');
+  await page.getByLabel('Animal type').selectOption('bobcat');
+  await expect(page.getByText('Bobcat', { exact: true })).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: 'Add to interests' }).click();
+  await page.getByRole('button', { name: 'Plan a day', exact: true }).click();
+  await expect(page.getByText('Wildlife interests: Bobcat')).toBeVisible();
+  await page.getByRole('button', { name: 'Add stop', exact: true }).first().click();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('florida-explorer-outing')!).stops.length)).toBe(1);
+  await axe(page);
+  await page.screenshot({ path: 'scripts/out/wildlife-planner-mobile.png' });
+});
+
 // Explicit synthetic fixtures: no live FEMA calls or event-validation claims in CI.
 function fixture(request: { lat: number; lon: number; selectionId: number }, state: FemaState = 'classified_near_boundary'): FemaResponse {
   return {
@@ -20,6 +70,7 @@ function fixture(request: { lat: number; lon: number; selectionId: number }, sta
 
 // External map/data services are blocked so results don't depend on third-party uptime.
 test.beforeEach(async ({ page }) => {
+  await page.route('**/api/wildlife', (route) => route.fulfill({ json: { records: [], reportsLoaded: 0, canExpand: false, radiusKm: 50, retrievedAt: '2026-11-06T12:00:00Z' } }));
   await page.route(/(ca|ags)\.dep\.state\.fl\.us|tile\.openstreetmap\.org|arcgis\.com/, (r) => r.abort());
   // Localization/WASM belong to the installed SDK, not a live data source. Supply local pinned assets.
   await page.route('https://js.arcgis.com/5.1.27/@arcgis/core/assets/**', async (route) => {
@@ -74,7 +125,7 @@ test('Nature shows mapped matches separately from nearby places; Show on map pre
   await selectTyped(page); await page.getByRole('button', { name: 'Nature & Wildlife', exact: true }).click();
   const nature = page.getByRole('region', { name: 'Nature at this place' });
   await expect(nature).toContainText('No conservation-land polygon was returned');
-  await expect(nature).toContainText('1.20 km N to mapped boundary');
+  await expect(nature).toContainText('0.75 mi N to mapped boundary');
   await page.getByRole('button', { name: 'Show exact location' }).click();
   await nature.getByRole('button', { name: 'Show Synthetic coastal preserve on map' }).click();
   await expect(page.locator('.coords')).toHaveText('26.50890, −80.05220');

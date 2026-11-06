@@ -2,10 +2,10 @@
 
 Select a place. Explore its story. Follow the evidence.
 
-Independent Florida Explorer documentation workspace.
+Florida geographic discovery app with a local Node API and responsive ArcGIS map.
 Repository: [cf-florida-explorer](https://github.com/chuckfarah-devin/cf-florida-explorer), separate from `cf-ai-infrastructure-analyzer`.
 
-Status as of 2026-11-05: Water & Weather and checked Ask answers are in stacked review PRs. Chuck authorized I3b nature facts and nature answers; see [Nature implementation](docs/i3b-nature-implementation.md). Model routing, wildlife sightings/habitat models, merging and deployment remain separately gated.
+Status as of 2026-11-06: personal-use MVP release candidate. Water & Weather, Nature & Wildlife, History & Change and Land & Infrastructure are available. Checked Ask answers cover Water and mapped Nature facts. See [MVP scope and acceptance](docs/mvp-release.md) for completed scope, evidence and deferred work. No public deployment or native Android app.
 
 ## Reading order
 
@@ -21,7 +21,7 @@ Status as of 2026-11-05: Water & Weather and checked Ask answers are in stacked 
 The documentation baseline remains under docs/, specs/, devin/, and data/. Application code is under src/; the portable local API is under server/.
 
 
-## Development (I1–I4 template-first)
+## Run locally
 
 Requires Node 24.15+. Copy `.env.example` to `.env.local` and set `VITE_ARCGIS_API_KEY` to the dedicated, referrer-restricted Florida Explorer key (never commit it). Without a key the app uses an OpenStreetMap development basemap and place search is unavailable.
 
@@ -31,7 +31,7 @@ npm run dev        # local dev server
 npm run lint && npm run typecheck && npm test && npm run build
 ```
 
-The Vite development and preview servers serve `/api/fema`, `/api/noaa`, `/api/nature` and `/api/ask` locally. For the built frontend plus local API, run `npm run build` then `npm start` (default http://localhost:4173; `PORT` changes the port). Use localhost if that is the hostname permitted by your ArcGIS key. An HTTPS reverse proxy must explicitly configure `PUBLIC_ORIGIN` to its exact frontend origin; forwarded protocol headers are not trusted. No hosting provider or deployment is selected.
+The Vite development and preview servers serve `/api/fema`, `/api/noaa`, `/api/nature`, `/api/ask`, `/api/wildlife`, `/api/history` and `/api/infrastructure` locally. For the built frontend plus local API, run `npm run build` then `npm start` (default http://localhost:4173; `PORT` changes the port). Use localhost if that is the hostname permitted by your ArcGIS key. An HTTPS reverse proxy must explicitly configure `PUBLIC_ORIGIN` to its exact frontend origin; forwarded protocol headers are not trusted. No hosting provider or deployment is selected.
 
 FEMA requests need no API key. A static-files-only server cannot run the API: it must use the portable handler or the provided local Node server. Server runtime is Node 24.15+ and uses native TypeScript stripping; no production server dependency is added.
 
