@@ -2,6 +2,13 @@
 
 Select a place. Explore its story. Follow the evidence.
 
+## Live application
+
+[Open Florida Explorer](https://cf-florida-explorer.bracedecho1.chatgpt.site)
+
+Hosted with its data APIs through Sites. Access is private to the owner; sign in with the account that owns the site. This is the personal-use MVP snapshot from PR #7. GitHub Pages is not used because it cannot run the server-side data APIs. The implementation PR stack remains separate from this README link; it has not been merged by this update.
+
+
 Independent Florida Explorer documentation workspace.
 Repository: [cf-florida-explorer](https://github.com/chuckfarah-devin/cf-florida-explorer), separate from `cf-ai-infrastructure-analyzer`.
 
