@@ -1,3 +1,5 @@
+> Current release status: see [personal-use MVP scope](../docs/mvp-release.md), November 6, 2026. This document preserves the original design baseline; the release record identifies implemented, changed and deferred scope.
+
 # Design summary, unresolved decisions and review checklist
 
 Status: technical-design delivery for G1. **Implementation NOT authorized.** Devin stops here and waits for Chuck's explicit approval.

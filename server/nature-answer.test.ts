@@ -32,7 +32,7 @@ it('renders source-provided positive wetland and preserve names separately from 
 it('binds the nearby feature and distance to the original geometry digest', async () => {
   const n = fixture(); const p = park(); n.nearby = [p]; n.sources[3].features = [{ ...p, geometry: undefined }];
   const a = await service(n).answer(point, 1, 'What protected places are nearby?', window);
-  expect(a.findings[0].text).toContain('Synthetic park'); expect(a.findings[0].text).toContain('1.00 km E');
+  expect(a.findings[0].text).toContain('Synthetic park'); expect(a.findings[0].text).toContain('0.62 mi E');
   for (const change of ['distance', 'name', 'geometry', 'query'] as const) {
     const altered = structuredClone(n);
     if (change === 'distance') altered.nearby[0].distanceMeters = 20;

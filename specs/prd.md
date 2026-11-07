@@ -1,3 +1,5 @@
+> Current release status: see [personal-use MVP scope](../docs/mvp-release.md), November 6, 2026. This document preserves the original design baseline; the release record identifies implemented, changed and deferred scope.
+
 # Product requirements — v0.1
 
 Status: proposed baseline; technical design authorized, implementation gated.
