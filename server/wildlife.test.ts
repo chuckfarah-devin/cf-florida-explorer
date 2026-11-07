@@ -3,6 +3,15 @@ import { cleanObservations, createWildlifeHandler, groupWildlife } from './wildl
 const observation = { id: 123, observed_on: '2026-10-24', quality_grade: 'research', taxon: { name: 'Lynx rufus', preferred_common_name: 'Bobcat' }, location: '26,-81' };
 const req = (body: unknown = { lat: 26, lon: -81, group: 'reptiles' }) => new Request('http://localhost/api/wildlife', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 describe('wildlife evidence', () => {
+  it('honors upstream throttling and avoids repeated requests during Retry-After', async () => {
+    const fetcher = vi.fn().mockResolvedValue(new Response('', { status: 429, headers: { 'Retry-After': '60' } }));
+    const handler = createWildlifeHandler(fetcher);
+    expect((await handler(req())).status).toBe(429);
+    const retry = await handler(req());
+    expect(retry.status).toBe(429);
+    expect(Number(retry.headers.get('Retry-After'))).toBeGreaterThan(0);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
   it('samples every main animal group rather than allowing one group to fill the mixed list', async () => {
     const fetcher = vi.fn().mockImplementation(() => Promise.resolve(Response.json({ total_results: 0, results: [] })));
     await createWildlifeHandler(fetcher)(req({ lat: 26, lon: -81 }));

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { fetchWildlife } from '../wildlife/client';
 import { wildlifeGroups } from '../nature/wildlife-categories';
 import type { Selection } from '../state/selection';
 
@@ -25,14 +26,14 @@ export function WildlifePlanner({ selection }: { selection: Selection }) {
   const [animalType, setAnimalType] = useState('all');
   const [status, setStatus] = useState('all');
   const types = wildlifeGroups.find((g) => g.id === group)?.types ?? [];
-  const [result, setResult] = useState<{ key: string; data?: Results; error?: boolean }>();
+  const [result, setResult] = useState<{ key: string; data?: Results; error?: boolean; busy?: boolean }>();
   const key = `${selection.selectionId}/${selection.point.lat}/${selection.point.lon}/${attempt}/${group}/${animalType}/${status}/${depth}`;
   useEffect(() => { try { localStorage.setItem('florida-explorer-outing', JSON.stringify(plan)); } catch { /* Storage may be disabled. */ } }, [plan]);
   useEffect(() => {
     const controller = new AbortController(); let current = true;
-    fetch('/api/wildlife', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...selection.point, group, type: animalType, status, depth }), signal: controller.signal })
-      .then(async (r) => { if (!r.ok) throw new Error(); return await r.json() as Results; })
-      .then((data) => { if (current) setResult({ key, data }); }, () => { if (current) setResult({ key, error: true }); });
+    fetchWildlife(JSON.stringify({ ...selection.point, group, type: animalType, status, depth }), controller.signal)
+      .then(async (r) => { if (!r.ok) throw new Error(r.status === 429 ? 'rate_limit' : 'lookup_error'); return await r.json() as Results; })
+      .then((data) => { if (current) setResult({ key, data }); }, (error) => { if (current) setResult({ key, error: true, busy: error instanceof Error && error.message === 'rate_limit' }); });
     return () => { current = false; controller.abort(); };
   }, [key, selection.point, group, animalType, status, depth]);
   const active = result?.key === key ? result : undefined;
@@ -42,7 +43,7 @@ export function WildlifePlanner({ selection }: { selection: Selection }) {
     <nav aria-label="Wildlife views"><button type="button" aria-pressed={view === 'wildlife'} onClick={() => setView('wildlife')}>Wildlife nearby</button><button type="button" aria-pressed={view === 'plan'} onClick={() => setView('plan')}>Plan a day</button></nav>
     {view === 'wildlife' ? <><h2>Wildlife people have reported</h2><div className="wildlife-filters"><label>Native status <select value={status} onChange={(e) => { setStatus(e.target.value); setDepth(1); }}><option value="all">All wildlife</option><option value="native">Native</option><option value="introduced">Non-native / introduced</option></select></label><label>Animal group <select value={group} onChange={(e) => { setGroup(e.target.value); setAnimalType('all'); setDepth(1); }}><option value="all">All animals</option>{wildlifeGroups.map((g) => <option key={g.id} value={g.id}>{g.label}</option>)}</select></label>{types.length > 0 && <label>Animal type <select value={animalType} onChange={(e) => { setAnimalType(e.target.value); setDepth(1); }}><option value="all">All in this group</option>{types.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}</select></label>}</div><p className="nature-caption">Recent iNaturalist reports · closest loaded first · within 31.1 mi · counts from returned reports</p>
       {!active && <p role="status">Finding sightings…</p>}
-      {active?.error && <p role="status">Couldn’t load sightings.</p>}
+      {active?.error && <p role="status">{active.busy ? 'Sightings source is busy. Try again in a minute.' : 'Couldn’t load sightings.'}</p>}
       {active?.data && <>{active.data.records.length === 0 ? <p>No sightings found in the connected sources.</p> : <ul className="wildlife-records">{active.data.records.map((r) => <li key={r.id}><strong>{r.name}</strong><span className="wildlife-status">{r.reportCount ?? 1} {(r.reportCount ?? 1) === 1 ? 'report' : 'reports'}</span><span className="wildlife-status">{r.nativeStatus === 'native' ? 'Native' : r.nativeStatus === 'introduced' ? 'Non-native' : 'Status unknown'}</span><p className="nature-caption">{r.scientificName} · closest report {r.observedOn}{r.distanceKm !== undefined && ` · about ${(r.distanceKm / 1.609344).toFixed(1)} mi away`}</p><a href={r.url} target="_blank" rel="noreferrer">View closest report ↗</a> <button type="button" aria-pressed={plan.interests.includes(r.name)} onClick={() => toggle('interests', r.name)}>{plan.interests.includes(r.name) ? 'Remove interest' : 'Add to interests'}</button></li>)}</ul>}<p className="nature-caption">{active.data.records.length} unique animals{active.data.reportsLoaded !== undefined && ` from ${active.data.reportsLoaded} loaded reports`}</p>{active.data.canExpand && depth === 1 && <button type="button" onClick={() => setDepth(2)}>Search more reports</button>}<details><summary>Source details</summary><p>iNaturalist · research-grade public records · up to 100 recent reports initially, or 200 with Search more reports, grouped by scientific name and sorted by closest distance. Counts refer to these returned reports, not all reports in the region. Retrieved {active.data.retrievedAt}. Native status is iNaturalist’s classification where the observation was reported. Non-native does not automatically mean invasive. Exact animal locations are not displayed.</p></details></>}
       <p><a href="https://app.myfwc.com/hsc/PantherSightings/Home/Locations" target="_blank" rel="noreferrer">Explore FWC panther reports ↗</a></p>
       <button type="button" className="linkbtn" onClick={() => setAttempt((n) => n + 1)}>Refresh sightings</button>

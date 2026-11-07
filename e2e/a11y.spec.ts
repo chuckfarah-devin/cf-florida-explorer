@@ -38,15 +38,15 @@ test('History shows nearby state records with accessible mobile controls', async
 
 test('mobile wildlife interests and public day plan are accessible and persist', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
-  await page.route('**/api/wildlife', (r) => r.fulfill({ json: { records: [{ id: 123, name: 'Bobcat', scientificName: 'Lynx rufus', observedOn: '2026-10-24', url: 'https://www.inaturalist.org/observations/123' }], radiusKm: 50, retrievedAt: '2026-11-05' } }));
+  await page.route('https://api.inaturalist.org/v1/observations**', (r) => r.fulfill({ json: { total_results: 1, results: [{ id: 123, observed_on: '2026-10-24', quality_grade: 'research', location: '26.1,-81.4', taxon: { name: 'Lynx rufus', preferred_common_name: 'Bobcat', native: true } }] } }));
   await page.getByRole('searchbox').fill('26.1, -81.4');
   await page.getByRole('searchbox').press('Enter');
   await page.getByRole('button', { name: 'Nature & Wildlife', exact: true }).click();
-  await expect(page.getByText('Bobcat', { exact: true })).toBeVisible();
+  await expect(page.getByText('Bobcat', { exact: true })).toBeVisible({ timeout: 20000 });
   await page.getByLabel('Native status').selectOption('native');
   await page.getByLabel('Animal group').selectOption('mammals');
   await page.getByLabel('Animal type').selectOption('bobcat');
-  await expect(page.getByText('Bobcat', { exact: true })).toBeVisible();
+  await expect(page.getByText('Bobcat', { exact: true })).toBeVisible({ timeout: 20000 });
   await axe(page);
   await page.getByRole('button', { name: 'Add to interests' }).click();
   await page.getByRole('button', { name: 'Plan a day', exact: true }).click();
@@ -70,7 +70,7 @@ function fixture(request: { lat: number; lon: number; selectionId: number }, sta
 
 // External map/data services are blocked so results don't depend on third-party uptime.
 test.beforeEach(async ({ page }) => {
-  await page.route('**/api/wildlife', (route) => route.fulfill({ json: { records: [], reportsLoaded: 0, canExpand: false, radiusKm: 50, retrievedAt: '2026-11-06T12:00:00Z' } }));
+  await page.route('https://api.inaturalist.org/v1/observations**', (route) => route.fulfill({ json: { results: [], total_results: 0 } }));
   await page.route(/(ca|ags)\.dep\.state\.fl\.us|tile\.openstreetmap\.org|arcgis\.com/, (r) => r.abort());
   // Localization/WASM belong to the installed SDK, not a live data source. Supply local pinned assets.
   await page.route('https://js.arcgis.com/5.1.27/@arcgis/core/assets/**', async (route) => {

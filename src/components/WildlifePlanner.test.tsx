@@ -1,6 +1,7 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { WildlifePlanner } from './WildlifePlanner';
+vi.mock('../wildlife/client', () => ({ fetchWildlife: (body: string, signal: AbortSignal) => fetch('/api/wildlife', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, signal }) }));
 const selection = { selectionId: 1, point: { lat: 26.1, lon: -81.4 }, source: 'typed' as const };
 afterEach(() => { vi.unstubAllGlobals(); localStorage.clear(); });
 it('shows the larger search size and expands to more reports on request', async () => {
