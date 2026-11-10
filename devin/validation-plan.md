@@ -44,11 +44,11 @@ Status: future validation design for owner review (G1). Nothing here has been ru
 
 ## 4. Briny Breezes fixtures (proposed; owner must accept)
 
-Event date: **unresolved.** The user's "last week" is not resolved relative to any date. Until Chuck supplies a fixed window and point, only a labelled historical comparison is possible.
+Event window: **confirmed by Chuck (2026-11-03)**: 25–29 Oct 2026, America/New_York. The exact validation point is still to be selected. The owner observation, candidate published reports and evidence-class rules are in devin/bb01-event-record.md.
 
 | ID | Point | Window | Purpose | Status |
 |---|---|---|---|---|
-| BB-01 | BB-P1 26.5089022, -80.0522463 (TIGER internal point) | **TBD by Chuck** (user event) | Primary validation of reported event | Blocked on D2 |
+| BB-01 | **To be selected** within Chuck's outlined area (BB-P1 is a candidate only) | 2026-10-25 00:00 to 2026-10-30 00:00 America/New_York (UTC−04:00) = 2026-10-25T04:00Z to 2026-10-30T04:00Z | Primary validation of the owner-reported event | Window confirmed; point pending (D2) |
 | BB-02 | BB-P1 | 2025-10-04 00:00 to 2025-10-13 00:00 America/New_York (UTC−04:00) = 2025-10-04T04:00Z to 2025-10-13T04:00Z | **Historical comparison only**: Lake Worth Pier HTF daily shows NOS minor-threshold flags on 10-04 and 10-07…10-12 (Checked). Cannot validate the user's event | Proposed |
 | BB-03 | BB-P2 26.5087, -80.0517 | same as BB-02 | Second in-town point with different zone (X 0.2%) | Proposed |
 
