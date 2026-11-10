@@ -1,18 +1,18 @@
 # I1 + C7 verification record
 
-What was actually checked for PR #2, where it ran, and what is still only planned. Recorded 2026-11-03.
+What was actually checked for PR #2, where it ran, and what is still only planned. Recorded 2026-11-03; updated for revision `1ba12c9` (see "Re-run on 1ba12c9").
 
 ## Where each check ran
 
 | Environment | What it is | Checks run there |
 |---|---|---|
-| GitHub Actions CI | Ubuntu runner, no real browser, no ArcGIS calls | `npm run lint`, `npm run typecheck`, 25 Vitest/jsdom tests, `npm run build`, then `npm run test:a11y`: 4 Playwright + axe-core tests against the built app in headless Chromium, with external map/data services blocked (OSM fallback basemap, no key). Passing on the latest commit. |
+| GitHub Actions CI | Ubuntu runner, no real browser, no ArcGIS calls | `npm run lint`, `npm run typecheck`, 31 Vitest/jsdom tests in 5 files (including 6 SDK-boundary layer-lifecycle tests), `npm run build`, then `npm run test:a11y`: 4 Playwright + axe-core tests against the built app in headless Chromium, with external map/data services blocked (OSM fallback basemap, no key). Passing on the latest commit. |
 | Local real-key preview | `npm run preview` on `http://localhost:4173`, real Chrome, real ArcGIS and FDEP services | ArcGIS basemap, "Briny Breezes, FL" search, the screenshots in `devin/i1-screenshots/` |
 | Preview-origin test build | The same built files served by Playwright under the exact preview origin (`https://florida-explorer--25otxhxk.preview.devinapps.com`), real headless Chrome, real ArcGIS and FDEP network | Everything in "Completed checks" below |
 | Direct API check | `curl` to Esri's basemap-styles and geocode endpoints with Origin/Referer headers | The key works for the preview origin and localhost and is rejected for an unlisted origin |
 | **Actual hosted preview** | The Devin preview link (it needs a Devin login) | **Not checked by Devin.** Devin's browser can't log in to it; only Chuck has opened it. |
 
-## Completed checks (preview-origin test build, Chrome)
+## Completed checks (preview-origin test build, Chrome, real key; revisions `422a2e3`–`8886d71`)
 
 | Area | Result |
 |---|---|
@@ -28,6 +28,22 @@ What was actually checked for PR #2, where it ran, and what is still only planne
 | Layer failing mid-session | **Fixed, now passes.** The first run failed: data requests failed (6 in the test) but the status stayed "Shown". Failed requests to a layer's service are now attributed to that layer (by sublayer where the URL names one) and set it to "Couldn't load" with Retry. Re-test: same 6 failures now show "Couldn't load / Retry". |
 | Automated accessibility (axe-core 4.10.2, WCAG 2.0/2.1 A and AA rules) | **Fixed, now 0 violations** on desktop start, desktop place and mobile place views. The first run failed colour contrast: #73828a was 3.97:1 on white and 3.58:1 on sand. The muted text colour is now #5c6a71: 5.59:1 on white, 5.06:1 on sand, 4.83:1 on light teal. The suggested-questions container now has `role="group"`. axe still can't rate contrast for Esri's attribution text over the map (reported as "incomplete", not pass). axe now runs in CI (`e2e/a11y.spec.ts`). |
 
+## Re-run on 1ba12c9
+
+`1ba12c9` added stale-load guards to layer status (only the current, still-visible layer instance and load can publish "Shown" or "Couldn't load"; no callbacks after the map is destroyed; replaced layers are disposed on Retry) plus 6 regression tests. See `devin/i1-codex-followup.md`.
+
+| Check | Environment | Result |
+|---|---|---|
+| CI (lint, typecheck, 31 Vitest tests, build, 4 Playwright + axe tests) | GitHub Actions | Pass |
+| Same commands | Local, Node 24 | Pass |
+| Stored ArcGIS key | Direct API check | **Rejected (HTTP 498 Invalid Token) from both the preview origin and localhost.** Live ArcGIS basemap and place search were therefore **not** re-checked on this revision; the earlier live results above are from `8886d71` and before. |
+| Keyboard (search box via typed coordinates, controls, named map stop with focus ring, Enter selects map center) | Preview-origin test build, no key | Pass |
+| Desktop pinned Ask (1366×768, 1280×720, 1024×768); mobile internal scrolling and pinned Ask (360×800, 390×844, 800×360) | Preview-origin test build, no key | Pass; page scroll stays 0, no horizontal overflow |
+| Layer loading, error at page load, alert, Retry | Preview-origin test build, no key | Pass |
+| Layer failing mid-session | Preview-origin test build, no key | **Inconclusive.** After a layer is switched on, its data requests come from ArcGIS web workers, which Playwright's request routing didn't intercept, and the no-key map drew nothing in headless Chrome, so the outage couldn't be simulated. Evidence for this revision is the SDK-boundary tests (mid-session error then Retry; late error from a replaced load; completion/error after toggling off; error while initial loading settles; failure after map destruction). |
+| axe-core (desktop start, desktop place, mobile place) | Preview-origin test build, no key, and CI | 0 violations; Esri attribution contrast still "incomplete" |
+| `npm ci` audit | Local | 11 moderate advisories reported; no dependency changes made in this increment |
+
 ## Planned acceptance tests (not yet run)
 
 - Real screen readers (NVDA, VoiceOver, TalkBack).
@@ -35,3 +51,4 @@ What was actually checked for PR #2, where it ran, and what is still only planne
 - 200% and 400% zoom reflow, and reduced motion.
 - Performance/Lighthouse budgets.
 - A check of the hosted preview link itself.
+- Live ArcGIS basemap/search and a live mid-session outage test on the current revision, once a valid key is stored.
