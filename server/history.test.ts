@@ -25,3 +25,9 @@ it('shares successful source retrieval and separates source failure from no near
 it('rejects non-Florida selections without querying the source', async () => {
   const fetcher = vi.fn(); expect((await createHistoryHandler(fetcher)(request({ lat: 40, lon: -80 }))).status).toBe(400); expect(fetcher).not.toHaveBeenCalled();
 });
+it('uses a dated official snapshot only when the live catalogue fails', async () => {
+  const saved={records:parseMarkers(html([marker])),retrievedAt:'2026-11-16T15:00:00Z',sourceUrl:'https://markers.flheritage.com/home/map'};
+  const handler=createHistoryHandler(vi.fn().mockResolvedValue(new Response('Forbidden',{status:403})),saved);
+  const response=await handler(request());expect(response.status).toBe(200);
+  expect(await response.json()).toMatchObject({retrievalMode:'saved',retrievedAt:saved.retrievedAt,records:[{title:'School'}]});
+});

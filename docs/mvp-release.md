@@ -51,3 +51,23 @@ Raw local verification output, screenshots, build artifacts and logs under `scri
 The current change is stacked on the existing Nature PR #6, which itself depends on the earlier design/map/FEMA/NOAA/Ask PRs. Publishing a new review branch does not merge that stack into `main`. Review and merge order remains #1 through #6, followed by this release-candidate PR, unless the owner chooses a separate consolidation.
 
 Validation is recorded in the PR: lint, type checks, unit/API suite, production build and full Playwright/axe suite. Live probes remain separate from synthetic browser checks. Existing large ArcGIS bundle warnings and React test `act` warnings are recorded as non-failing follow-up items; neither is a claim of performance certification.
+
+## Hosted release verification — November 16, 2026
+
+The personal MVP is hosted at https://cf-florida-explorer.bracedecho1.chatgpt.site/ with owner-private access. Hosting is delivered; public sharing, Android packaging and broader Ask domains remain deferred. The historical design documents above do not override this release status.
+
+A production check found that FEMA, NOAA and mapped-Nature requests used `redirect: error`, which Cloudflare Workers does not implement. The shared upstream adapter now requests `manual` and rejects redirects without following them. A regression test covers this runtime difference and preserves the source-host boundary. Diagnostic logs contain only provider hostname, status and error class; no location, question, credential or response body.
+
+The state historical-marker website returned HTTP 403 from hosting. A saved official catalogue (1,204 public marker records, retrieved November 16) provides an explicitly dated fallback; live retrieval remains preferred. The fallback retains source links and short excerpts and does not claim a fresh live retrieval. Regenerate the snapshot from the official public map when maintaining this release.
+
+Before these repairs, GitHub CI for PR #7 head 80faff90a4338e661ecbfeef1fe78f375136869c passed. Local verification passed 280 tests; all 16 browser scenarios reported passing, but the browser command did not finish teardown normally. Affected source/adapter/history tests pass after repair. Final live retest results are recorded below when completed.
+
+Release integration remains separate: PR #7 and its earlier stacked dependencies have not been merged into main. Formal event-evidence closure, performance/load certification and scheduled provider monitoring remain incomplete. This is a hosted personal MVP, not full certification of all original specifications.
+
+### Final live retest
+
+Published hosted source e3b6f3d991f386797e94718469372674db9bc7cdc. All 283 local unit/API tests pass. Live ArcGIS basemap and place search returned HTTP 200; Briny search selected correctly with no fallback. NOAA state is `ok`; all four mapped-Nature sources are `ok`; history returns HTTP 200 using the dated fallback; watershed/canals/structures return `ok`.
+
+**Remaining release blocker:** FEMA still returns provider/connection failures from the hosted Worker (HTTP 525 observed after the redirect fix), while the same official queries succeed locally. The hosted FEMA state correctly remains unavailable, and flood Ask returns `supported: false` with no invented finding. Do not describe hosted flood answers as production-working until a live cited finding passes. No alternative proxy, weakened TLS check, client-supplied evidence or fabricated cache was introduced. The earlier compatibility fix restores NOAA and Nature but does not resolve this separate provider-hosting connection issue.
+
+GitHub integration is not complete until the review stack is merged. No merge was performed during this release verification. Public-sharing and continuous monitoring remain deferred.

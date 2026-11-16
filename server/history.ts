@@ -1,3 +1,5 @@
+import { markerSnapshot } from './history-snapshot.ts';
+import { upstreamFetch } from './upstream-fetch.ts';
 import { checkPoint } from '../src/config/bounds.ts';
 
 export const HISTORY_SOURCE = 'https://markers.flheritage.com/home/map';
@@ -25,7 +27,7 @@ export function nearbyMarkers(records: Marker[], point: { lat: number; lon: numb
     return { ...r, distanceKm: 12742 * Math.asin(Math.min(1, Math.sqrt(h))) };
   }).filter((r) => r.distanceKm <= 50).sort((a, b) => a.distanceKm - b.distanceKm).slice(0, 8);
 }
-export function createHistoryHandler(fetcher: typeof fetch = fetch) {
+export function createHistoryHandler(fetcher: typeof fetch = upstreamFetch, snapshot?: { records: Marker[]; retrievedAt: string; sourceUrl: string }) {
   let cache: { records: Marker[]; retrievedAt: string; until: number } | undefined;
   let pending: Promise<NonNullable<typeof cache>> | undefined;
   async function load() {
@@ -48,8 +50,8 @@ export function createHistoryHandler(fetcher: typeof fetch = fetch) {
     let b: Record<string, unknown>;
     try { const text = await request.text(); if (text.length > 4096) return json({ error: 'Too large' }, 413); b = JSON.parse(text); } catch { return json({ error: 'Invalid request' }, 400); }
     if (!b || typeof b.lat !== 'number' || typeof b.lon !== 'number' || !checkPoint({ lat: b.lat, lon: b.lon }).ok) return json({ error: 'Select a Florida point' }, 400);
-    try { const data = await load(); return json({ records: nearbyMarkers(data.records, { lat: b.lat, lon: b.lon }), radiusKm: 50, retrievedAt: data.retrievedAt, sourceUrl: HISTORY_SOURCE }); }
-    catch { return json({ error: 'Couldn’t load historical places' }, 503); }
+    try { const data = await load(); return json({ records: nearbyMarkers(data.records, { lat: b.lat, lon: b.lon }), radiusKm: 50, retrievedAt: data.retrievedAt, sourceUrl: HISTORY_SOURCE, retrievalMode: 'live' }); }
+    catch { if (snapshot?.sourceUrl === HISTORY_SOURCE && Number.isFinite(Date.parse(snapshot.retrievedAt))) return json({ records: nearbyMarkers(snapshot.records, { lat: b.lat, lon: b.lon }), radiusKm: 50, retrievedAt: snapshot.retrievedAt, sourceUrl: HISTORY_SOURCE, retrievalMode: 'saved' }); return json({ error: 'Couldn’t load historical places' }, 503); }
   };
 }
-export const handleHistoryRequest = createHistoryHandler();
+export const handleHistoryRequest = createHistoryHandler(upstreamFetch, markerSnapshot);

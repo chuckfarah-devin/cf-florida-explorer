@@ -5,7 +5,7 @@ Select a place. Explore its story. Follow the evidence.
 Florida geographic discovery app with a local Node API and responsive ArcGIS map.
 Repository: [cf-florida-explorer](https://github.com/chuckfarah-devin/cf-florida-explorer), separate from `cf-ai-infrastructure-analyzer`.
 
-Status as of 2026-11-06: personal-use MVP release candidate. Water & Weather, Nature & Wildlife, History & Change and Land & Infrastructure are available. Checked Ask answers cover Water and mapped Nature facts. See [MVP scope and acceptance](docs/mvp-release.md) for completed scope, evidence and deferred work. No public deployment or native Android app.
+Status as of 2026-11-06: personal-use MVP release candidate. Water & Weather, Nature & Wildlife, History & Change and Land & Infrastructure are available. Checked Ask answers cover Water and mapped Nature facts. See [MVP scope and acceptance](docs/mvp-release.md) for completed scope, evidence and deferred work. Owner-private hosted MVP: https://cf-florida-explorer.bracedecho1.chatgpt.site/ . No public sharing or native Android app.
 
 ## Reading order
 
@@ -31,7 +31,7 @@ npm run dev        # local dev server
 npm run lint && npm run typecheck && npm test && npm run build
 ```
 
-The Vite development and preview servers serve `/api/fema`, `/api/noaa`, `/api/nature`, `/api/ask`, `/api/wildlife`, `/api/history` and `/api/infrastructure` locally. For the built frontend plus local API, run `npm run build` then `npm start` (default http://localhost:4173; `PORT` changes the port). Use localhost if that is the hostname permitted by your ArcGIS key. An HTTPS reverse proxy must explicitly configure `PUBLIC_ORIGIN` to its exact frontend origin; forwarded protocol headers are not trusted. No hosting provider or deployment is selected.
+The Vite development and preview servers serve `/api/fema`, `/api/noaa`, `/api/nature`, `/api/ask`, `/api/wildlife`, `/api/history` and `/api/infrastructure` locally. For the built frontend plus local API, run `npm run build` then `npm start` (default http://localhost:4173; `PORT` changes the port). Use localhost if that is the hostname permitted by your ArcGIS key. An HTTPS reverse proxy must explicitly configure `PUBLIC_ORIGIN` to its exact frontend origin; forwarded protocol headers are not trusted. The owner-private hosted MVP is available at https://cf-florida-explorer.bracedecho1.chatgpt.site/; its Worker adapter and deployment manifest live in the hosted source checkout.
 
 FEMA requests need no API key. A static-files-only server cannot run the API: it must use the portable handler or the provided local Node server. Server runtime is Node 24.15+ and uses native TypeScript stripping; no production server dependency is added.
 

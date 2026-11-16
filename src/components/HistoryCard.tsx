@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Selection } from '../state/selection';
 import { localHistory } from '../nature/local-history';
 interface HistoricalPlace { id: number; title: string; markerYear: string; city: string; county: string; address: string; excerpt: string; url: string; distanceKm: number }
-interface HistoryResults { records: HistoricalPlace[]; retrievedAt: string; radiusKm: number }
+interface HistoryResults { retrievalMode?: "live" | "saved"; records: HistoricalPlace[]; retrievedAt: string; radiusKm: number }
 export function HistoryCard({ selection }: { selection: Selection }) {
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<{ key: string; data?: HistoryResults; error?: boolean }>();
@@ -24,7 +24,7 @@ export function HistoryCard({ selection }: { selection: Selection }) {
     <p className="nature-caption">Closest first · within 31.1 mi</p>
     {!active && <p role="status">Finding historical places…</p>}
     {active?.error && <p role="status">Couldn’t load historical places.</p>}
-    {active?.data && <>{active.data.records.length === 0 ? <p>No historical markers found nearby.</p> : <ol className="history-places">{active.data.records.map((r) => <li key={r.id}><h3>{r.title}</h3><p className="history-distance">About {(r.distanceKm / 1.609344).toFixed(1)} mi away{r.city && ` · ${r.city}`}</p>{r.excerpt && <p>{r.excerpt}</p>}{r.address && <p className="nature-caption">Marker location: {r.address}</p>}<p className="nature-caption">{r.markerYear ? `Marker year: ${r.markerYear}` : 'Marker year not listed'}{r.county && ` · ${r.county} County`}</p><a href={r.url} target="_blank" rel="noreferrer">Read the state’s marker record ↗</a></li>)}</ol>}
+    {active?.data && <>{active.data.retrievalMode === "saved" && <p className="nature-caption">Showing saved state marker records from {active.data.retrievedAt.slice(0, 10)}; live refresh unavailable.</p>}{active.data.records.length === 0 ? <p>No historical markers found nearby.</p> : <ol className="history-places">{active.data.records.map((r) => <li key={r.id}><h3>{r.title}</h3><p className="history-distance">About {(r.distanceKm / 1.609344).toFixed(1)} mi away{r.city && ` · ${r.city}`}</p>{r.excerpt && <p>{r.excerpt}</p>}{r.address && <p className="nature-caption">Marker location: {r.address}</p>}<p className="nature-caption">{r.markerYear ? `Marker year: ${r.markerYear}` : 'Marker year not listed'}{r.county && ` · ${r.county} County`}</p><a href={r.url} target="_blank" rel="noreferrer">Read the state’s marker record ↗</a></li>)}</ol>}
       <details><summary>Florida historical markers · Source details</summary><p>Florida Department of State, Division of Historical Resources. Up to eight closest markers in the state’s published map, within 31.1 mi. Distances are straight-line estimates to marker locations. Marker year is the source’s marker date, not the date of every event in its text.</p><p>Retrieved {active.data.retrievedAt}.</p><a href="https://markers.flheritage.com/home/map" target="_blank" rel="noreferrer">Open the official marker map ↗</a></details>
     </>}
     {active && <button type="button" className="linkbtn" onClick={() => setAttempt((n) => n + 1)}>Retry history lookup</button>}

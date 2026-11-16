@@ -1,3 +1,4 @@
+import { upstreamFetch } from './upstream-fetch.ts';
 import { checkPoint, type LatLon } from '../src/config/bounds.ts';
 import type { TideResponse as NoaaResponse, TideProduct, TideRow, TideStation, TideDatum } from '../src/noaa/types.ts';
 type TideWindow = NoaaResponse['window'];
@@ -53,7 +54,7 @@ interface Options { fetcher?: typeof fetch; now?: () => number; timeoutMs?: numb
 
 /** Fixed public endpoints; no API key, client-selected URL, cross-station offsets or extrapolation. */
 export function createNoaaService(options: Options = {}) {
-  const fetcher = options.fetcher ?? fetch; const now = options.now ?? Date.now;
+  const fetcher = options.fetcher ?? upstreamFetch; const now = options.now ?? Date.now;
   const sleep = options.sleep ?? ((ms: number) => new Promise((r) => setTimeout(r, ms)));
   const cache = new Map<string, { saved: number; data: unknown }>();
   const pending = new Map<string, Promise<unknown>>();
