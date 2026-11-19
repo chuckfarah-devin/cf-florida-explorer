@@ -118,3 +118,4 @@ h1{font-size:30px;line-height:1.15;margin:4px 0 6px}
 .infrastructure-source li { margin-bottom:8px; }
 .infrastructure-card a { overflow-wrap:anywhere; }
 .infrastructure-help { margin:20px 0; }
+.conditions-section{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}.conditions-section h3{font-size:1rem}.conditions-card p,.conditions-card li{font-size:1rem;line-height:1.5}.conditions-card a{color:#075764;text-decoration:underline}.conditions-card .nature-caption{font-size:.875rem}.conditions-links{display:flex;gap:14px;flex-wrap:wrap}.conditions-list{padding-left:18px}.conditions-list li{padding:8px 0}.conditions-list p{margin:5px 0}.conditions-alert{border-left:3px solid #b05c13;padding:8px 12px;margin:8px 0;background:#fff8e9}.conditions-alert summary{cursor:pointer;font-weight:600;min-height:32px}.conditions-note{padding:12px;background:#edf4f2;border-radius:8px}

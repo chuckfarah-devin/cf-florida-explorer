@@ -3,6 +3,7 @@ import { formatLatLon } from '../config/bounds';
 import type { Selection } from '../state/selection';
 import type { DomainId } from './Header';
 import { FloodCard } from './FloodCard';
+import { ConditionsCard } from './ConditionsCard';
 import { TideCard } from './TideCard';
 import type { TideStationMarker } from '../map/noaaStations';
 import type { TideRequest } from '../noaa/types';
@@ -35,6 +36,7 @@ export function PlacePanel({ selection, domain, onStations, onWindow, onShowFeat
       {showExact && <p className="coords">{formatLatLon(selection.point)}</p>}
       {domain === 'land' && <InfrastructureCard selection={selection} />}
       {domain === 'history' && <HistoryCard selection={selection} />}
+      {domain === 'water' && <ConditionsCard selection={selection} />}
       {domain === 'water' && <FloodCard selection={selection} />}
       {domain === 'water' && <TideCard selection={selection} onStations={onStations} onWindow={onWindow} />}
       {domain === 'nature' && <WildlifePlanner selection={selection} />}

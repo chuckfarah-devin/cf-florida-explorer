@@ -71,3 +71,9 @@ Published hosted source e3b6f3d991f386797e94718469372674db9bc7cdc. All 283 local
 **Remaining release blocker:** FEMA still returns provider/connection failures from the hosted Worker (HTTP 525 observed after the redirect fix), while the same official queries succeed locally. The hosted FEMA state correctly remains unavailable, and flood Ask returns `supported: false` with no invented finding. Do not describe hosted flood answers as production-working until a live cited finding passes. No alternative proxy, weakened TLS check, client-supplied evidence or fabricated cache was introduced. The earlier compatibility fix restores NOAA and Nature but does not resolve this separate provider-hosting connection issue.
 
 GitHub integration is not complete until the review stack is merged. No merge was performed during this release verification. Public-sharing and continuous monitoring remain deferred.
+
+Live Ask verification also passed: the tide question returned three cited NOAA findings and the nearby-protected-places question returned four cited conservation-boundary findings. This verifies these supported answer paths on the hosted endpoint; it does not resolve the FEMA flood-answer blocker.
+
+GitHub Actions run 43902547771 completed successfully for commit 4b071d8e4259c94238b7be83f589e0b34246e210, including lint, type checks, unit/API tests, build and browser/accessibility checks. The successful Linux CI run closes the browser-verification check despite the local Windows teardown issue. FEMA and unmerged integration remain open.
+
+November 19: statewide Conditions now added under Water & Weather. See docs/conditions-now.md for delivered source coverage, camera limits and route-comparison deferral. This does not resolve FEMA or certify dry routes.

@@ -1,3 +1,4 @@
+import { handleConditionsRequest } from './conditions.ts';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { handleFemaRequest } from './api.ts';
 import { handleNoaaRequest } from './noaa-api.ts';
@@ -19,7 +20,7 @@ export async function serveFema(req: IncomingMessage, res: ServerResponse, publi
   const origin = publicOrigin ? new URL(publicOrigin).origin : `http://${req.headers.host ?? 'localhost'}`;
   const request = new Request(new URL(req.url ?? '/', origin), { method: req.method, headers: Object.fromEntries(Object.entries(req.headers).filter(([, v]) => typeof v === 'string')) as Record<string, string>, ...(req.method === 'POST' ? { body: Buffer.concat(chunks) } : {}) });
   const path = new URL(request.url).pathname;
-  const response = await (path === '/api/infrastructure' ? handleInfrastructureRequest : path === '/api/history' ? handleHistoryRequest : path === '/api/wildlife' ? handleWildlifeRequest : path === '/api/nature' ? handleNatureRequest : path === '/api/ask' ? handleAskRequest : path === '/api/noaa' ? handleNoaaRequest : handleFemaRequest)(request);
+  const response = await (path === '/api/conditions' ? handleConditionsRequest : path === '/api/infrastructure' ? handleInfrastructureRequest : path === '/api/history' ? handleHistoryRequest : path === '/api/wildlife' ? handleWildlifeRequest : path === '/api/nature' ? handleNatureRequest : path === '/api/ask' ? handleAskRequest : path === '/api/noaa' ? handleNoaaRequest : handleFemaRequest)(request);
   res.writeHead(response.status, Object.fromEntries(response.headers));
   res.end(await response.text());
 }

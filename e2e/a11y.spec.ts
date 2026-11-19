@@ -70,6 +70,7 @@ function fixture(request: { lat: number; lon: number; selectionId: number }, sta
 
 // External map/data services are blocked so results don't depend on third-party uptime.
 test.beforeEach(async ({ page }) => {
+  await page.route('**/api/conditions', r => r.fulfill({json:{point:r.request().postDataJSON(),checkedAt:'2026-11-19T16:00:00Z',alerts:{state:'ok',items:[{title:'Flood Watch',description:'Heavy rain possible',expires:null}]},observation:{state:'unavailable'},roads:{state:'ok',items:[]},cameras:{state:'outside_coverage',items:[]}}}));
   await page.route('https://api.inaturalist.org/v1/observations**', (route) => route.fulfill({ json: { results: [], total_results: 0 } }));
   await page.route(/(ca|ags)\.dep\.state\.fl\.us|tile\.openstreetmap\.org|arcgis\.com/, (r) => r.abort());
   // Localization/WASM belong to the installed SDK, not a live data source. Supply local pinned assets.
@@ -281,4 +282,17 @@ test('mobile layer list scrolls within the map without covering the selected-pla
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(page.locator('.layers-float')).toHaveCount(0);
   await expect(page.locator('.askfoot input')).toBeInViewport();
+});
+
+test('Conditions now follows a statewide selection with accessible mobile and desktop states', async ({page}) => {
+  await selectTyped(page);
+  const card=page.getByRole('region',{name:'Conditions now',exact:true});
+  await expect(card.getByText('Flood Watch',{exact:true})).toBeVisible();
+  await expect(card).toContainText('Roads have not been confirmed clear');
+  await expect(card.getByRole('link',{name:'Open live rain radar'})).toHaveAttribute('href','https://radar.weather.gov/region/southeast/standard');
+  await axe(page);
+  await page.getByRole('searchbox').fill('30.44, -84.28');await page.getByRole('searchbox').press('Enter');
+  await expect(card.getByRole('link',{name:'Local NWS weather and alerts'})).toHaveAttribute('href','https://forecast.weather.gov/MapClick.php?lat=30.44&lon=-84.28');
+  await page.setViewportSize({width:390,height:844});await axe(page);
+  await card.getByRole('button',{name:'Refresh conditions'}).scrollIntoViewIfNeeded();await expect(page.locator('.askfoot input')).toBeInViewport();
 });
