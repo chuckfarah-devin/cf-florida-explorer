@@ -1,5 +1,5 @@
 /** C7 display-only reference layers (layer-reuse-feasibility.md). No answer claims are made from them in I1. */
-export type ReferenceLayerId = 'wetlands' | 'conservation' | 'aquatic-preserves' | 'shoreline';
+export type ReferenceLayerId = 'wetlands' | 'conservation' | 'aquatic-preserves' | 'shoreline' | 'flood';
 
 export interface ReferenceLayerConfig {
   id: ReferenceLayerId;
@@ -67,6 +67,13 @@ export const REFERENCE_LAYERS: readonly ReferenceLayerConfig[] = [
     sourcePage: 'https://shoreline.noaa.gov/data/datasheets/composite.html',
     about: 'Reference shoreline compiled from NOAA surveys of different dates.',
     limitation: 'Reference only. Shorelines change; not a property or legal boundary.',
+  },
+  {
+    id: 'flood', label: 'Flooding', sourceLabel: 'FEMA flood map', provider: 'FEMA National Flood Hazard Layer',
+    serviceUrl: 'https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer', sublayerId: 28, render: 'map-image', swatch: '#3b5ba5',
+    sourcePage: 'https://msc.fema.gov/portal/home',
+    about: 'Mapped flood zones. Zoom in to see the shading and FEMA legend. The server-side lookup in the place panel determines the zone at your selected point.',
+    limitation: 'Screening context, not an observed flood extent or a property-level forecast. Shading is hidden at small scales by FEMA. Effective FIRMs and applicable revisions control.',
   },
 ] as const;
 

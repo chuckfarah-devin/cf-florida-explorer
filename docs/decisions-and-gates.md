@@ -1,5 +1,9 @@
 # Decisions and approval gates
 
+## 2026-11-03 — I2 authorization
+
+Chuck explicitly instructed “proceed with i2”. FEMA point lookup, local API, overlay/source details and tests are authorized. The implementation follows the existing 15 m provisional radius and proposed 24-hour/7-day FEMA cache policy. See [I2 implementation record](i2-fema-implementation.md). Hosting remains undecided; NOAA, AI answers, merging and deployment still need separate approval.
+
 ## Recorded decisions
 
 - 2026-11-02: User authorizes a separate Florida Explorer workspace, documentation/specification preparation, multi-agent review and Devin technical-design-only handoff.

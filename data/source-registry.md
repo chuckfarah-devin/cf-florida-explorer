@@ -1,5 +1,9 @@
 # Evidence/source registry — 2026-11-02
 
+## I2 verification update — 2026-11-03
+
+FEMA S01 now has a working server-side connector for layers 28 (exact and separate 15 m buffer), 0 (coverage), 3 (panels), and 1 (revisions). Public metadata and live requests were checked; a complete repeat run at BB-P1/BB-P2 returned AE/X respectively. An earlier partial run exposed transient ancillary failures. See [I2 record](../docs/i2-fema-implementation.md) for provenance, caching, caveats and test limits. The original documentation-only statuses below are historical. No October-event flood extent or home damage was established by these queries.
+
 Status legend: documentation checked means an official reference was read, not that an end-to-end connector or point query was tested. All live connector feasibility, coverage, quotas, licensing/attribution and cache rights require technical-design confirmation.
 
 | ID | Provider/product and reference | Role / evidence class | Verification and limits |
