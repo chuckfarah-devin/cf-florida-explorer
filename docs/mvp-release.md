@@ -77,3 +77,5 @@ Live Ask verification also passed: the tide question returned three cited NOAA f
 GitHub Actions run 43902547771 completed successfully for commit 4b071d8e4259c94238b7be83f589e0b34246e210, including lint, type checks, unit/API tests, build and browser/accessibility checks. The successful Linux CI run closes the browser-verification check despite the local Windows teardown issue. FEMA and unmerged integration remain open.
 
 November 19: statewide Conditions now added under Water & Weather. See docs/conditions-now.md for delivered source coverage, camera limits and route-comparison deferral. This does not resolve FEMA or certify dry routes.
+
+November 24: Ask This Place now supports current NWS alerts, recent nearby station weather, FHP incident reports and listed county cameras, with distinct source types, checked fact/citation bindings and current-versus-historical labels. Still deterministic templates, no LLM/RAG generation. See docs/ask-current-conditions.md. FEMA access and route comparison remain open.

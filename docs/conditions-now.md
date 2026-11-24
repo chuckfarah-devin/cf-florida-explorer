@@ -14,3 +14,7 @@ Sources: https://www.weather.gov/documentation/services-web-api ; https://traffi
 Live local checks passed at King's Academy, Tallahassee and Orlando: alerts/station/road sources responded at all three; county cameras returned the school intersection and nearby approaches; camera coverage was explicitly absent outside the county. Tests cover other-point isolation, provider failures, expired alerts, unit conversions, upstream host boundaries, private same-origin requests and stale selection responses. Browser checks use mocked source results, independently from live probes.
 
 Next increment remains route comparison using reported closures, with source freshness and unknown-road coverage. Not implemented in this increment. FEMA remains a separately tracked provider-access failure and is not used as a live flood detection source. Wildlife/History/Land Ask remains deferred. Public sharing unchanged.
+
+Published source d5cb49c1f7dcc1ef758b5ad3ac3c71e9959ba99f at the existing owner-private URL. Hosted school API returned all source states ok; live Briny browser verified the panel. GitHub commit aee711a58d445f7b2f7d3145264cd2926455ac47 passed CI run 44571407727 including all 17 browser/accessibility checks. Current-condition facts are not yet connected to Ask This Place. No merge performed.
+
+November 24 update: these feeds are now connected to checked Ask answers in Water & Weather. See docs/ask-current-conditions.md. The earlier not-connected note records the November 19 release state. Route comparison remains deferred.
