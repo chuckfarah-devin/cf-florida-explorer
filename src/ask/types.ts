@@ -19,8 +19,8 @@ export interface AskResponse {
   createdAtUtc: string;
   question: string;
   mode: 'template';
-  intent: 'flood' | 'tides' | 'event' | 'nature' | 'unsupported';
-  findings: { id: string; text: string; evidenceClass: 'regulatory_classification' | 'measured_observation' | 'predicted_tide' | 'mapped_feature'; citations: string[]; facts?: { ref: string; field: string; value: string | number | null }[] }[];
+  intent: 'flood' | 'tides' | 'event' | 'nature' | 'conditions' | 'unsupported';
+  findings: { id: string; text: string; evidenceClass: 'regulatory_classification' | 'measured_observation' | 'predicted_tide' | 'mapped_feature' | 'weather_alert' | 'station_weather' | 'reported_road_condition' | 'camera_listing'; citations: string[]; facts?: { ref: string; field: string; value: string | number | null }[] }[];
   limitations: string[];
   sources: AskSource[];
   statuses: { source: string; state: string }[];

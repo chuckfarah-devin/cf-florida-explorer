@@ -1,3 +1,4 @@
+import { upstreamFetch } from './upstream-fetch.ts';
 import { checkPoint, type LatLon } from '../src/config/bounds.ts';
 import type { Attributes, FemaResult, FemaSource, QueryName, SourceError } from '../src/fema/types.ts';
 
@@ -55,7 +56,7 @@ interface Options {
 
 /** Fixed upstream endpoints; a bounded, process-local cache of complete retrieval batches. */
 export function createFemaService(options: Options = {}) {
-  const fetcher = options.fetcher ?? fetch;
+  const fetcher = options.fetcher ?? upstreamFetch;
   const now = options.now ?? Date.now;
   const sleep = options.sleep ?? ((ms: number) => new Promise((resolve) => setTimeout(resolve, ms)));
   const cache = new Map<string, { savedAt: number; result: FemaResult }>();

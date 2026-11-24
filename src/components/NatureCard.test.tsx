@@ -15,7 +15,7 @@ it('keeps no point match separate from nearby places and shows distance, source 
   render(<NatureCard selection={selection} lookup={vi.fn(async () => data)} onShowFeature={onShowFeature} />);
   expect(await screen.findByText('Synthetic Natural Area')).toBeVisible();
   expect(screen.getByText(/No conservation-land polygon was returned/)).toBeVisible();
-  expect(screen.getByText('1.22 km N to mapped boundary')).toBeVisible();
+  expect(screen.getByText('0.76 mi N to mapped boundary')).toBeVisible();
   expect(screen.getByText(/Protected does not always mean open/)).toBeVisible();
   expect(screen.getByText(/not necessarily a wetland/)).toBeVisible();
   await userEvent.click(screen.getByRole('button', { name: 'Show Synthetic Natural Area on map' }));

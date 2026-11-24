@@ -3,9 +3,13 @@ import { formatLatLon } from '../config/bounds';
 import type { Selection } from '../state/selection';
 import type { DomainId } from './Header';
 import { FloodCard } from './FloodCard';
+import { ConditionsCard } from './ConditionsCard';
 import { TideCard } from './TideCard';
 import type { TideStationMarker } from '../map/noaaStations';
 import type { TideRequest } from '../noaa/types';
+import { InfrastructureCard } from './InfrastructureCard';
+import { HistoryCard } from './HistoryCard';
+import { WildlifePlanner } from './WildlifePlanner';
 import { NatureCard } from './NatureCard';
 import type { NatureFeature } from '../nature/types';
 
@@ -24,14 +28,18 @@ export function PlacePanel({ selection, domain, onStations, onWindow, onShowFeat
   const title = selection.placeName ?? 'Selected spot';
   return (
     <div className="place" aria-live="polite">
-      <div className="kicker">{domain === 'nature' ? 'Nature & Wildlife' : 'Explore this place'}</div>
+      <div className="kicker">{domain === 'history' ? 'History & Change' : domain === 'nature' ? 'Nature & Wildlife' : 'Explore this place'}</div>
       <h1 className="serif">{title}</h1>
       <button type="button" className="linkbtn" aria-expanded={showExact} onClick={() => setShowExact(!showExact)}>
         {showExact ? 'Hide exact location' : 'Show exact location'}
       </button>
       {showExact && <p className="coords">{formatLatLon(selection.point)}</p>}
+      {domain === 'land' && <InfrastructureCard selection={selection} />}
+      {domain === 'history' && <HistoryCard selection={selection} />}
+      {domain === 'water' && <ConditionsCard selection={selection} />}
       {domain === 'water' && <FloodCard selection={selection} />}
       {domain === 'water' && <TideCard selection={selection} onStations={onStations} onWindow={onWindow} />}
+      {domain === 'nature' && <WildlifePlanner selection={selection} />}
       {domain === 'nature' && <NatureCard selection={selection} onShowFeature={onShowFeature} onClearFeature={onClearFeature} />}
     </div>
   );

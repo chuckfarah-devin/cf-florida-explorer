@@ -91,3 +91,8 @@ it('offers source-backed nature questions and keeps tide dates out of the nature
   expect(within(answer).getByText(/Source-based map answer/)).toBeVisible();
   expect(within(answer).queryByText(/MLLW/)).toBeNull();
 });
+
+it('offers current-condition questions and labels current answers separately from tide dates',async()=>{
+ const lookup=vi.fn<typeof fetchAnswer>(async(_s,_w,q)=>({...fixture(q),intent:'conditions' as const,findings:[{id:'C1',text:'No road reports returned; roads have not been confirmed clear.',evidenceClass:'reported_road_condition' as const,citations:['C1']}],sources:[{ref:'C1',label:'FHP live road report',url:'https://trafficincidents.flhsmv.gov/SmartWebClient/CadView.aspx',kind:'reported_road_condition',retrievedAtUtc:'2026-11-24T18:00:00Z'}]}));
+ render(<Harness lookup={lookup}/>);await userEvent.click(screen.getByRole('button',{name:'Are any road problems reported nearby?'}));expect(await screen.findByText(/No road reports returned/)).toBeVisible();const answer=screen.getByRole('region',{name:'Answer for this place'});expect(within(answer).getByText(/tide-date controls do not apply/)).toBeVisible();expect(within(answer).queryByText(/Source-based answer · 2026-10/)).toBeNull();expect(within(answer).getByRole('link',{name:'Open FL511 statewide roads and cameras'})).toHaveAttribute('href','https://www.fl511.com/');
+});

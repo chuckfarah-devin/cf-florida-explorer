@@ -1,3 +1,4 @@
+import { upstreamFetch } from './upstream-fetch.ts';
 import { checkPoint, type LatLon } from '../src/config/bounds.ts';
 import type { NatureFeature, NatureResponse, NatureSource } from '../src/nature/types.ts';
 import { nearestBoundary } from './nature-geometry.ts';
@@ -55,7 +56,7 @@ function features(body: unknown, id: NatureSource['id']): NatureFeature[] {
 class SourceFailure extends Error { retry: boolean; constructor(retry: boolean) { super('Nature service unavailable'); this.retry = retry; } }
 interface Options { fetcher?: typeof fetch; now?: () => number; timeoutMs?: number; sleep?: (ms: number) => Promise<void> }
 export function createNatureService(options: Options = {}) {
-  const fetcher = options.fetcher ?? fetch; const now = options.now ?? Date.now;
+  const fetcher = options.fetcher ?? upstreamFetch; const now = options.now ?? Date.now;
   const sleep = options.sleep ?? ((ms: number) => new Promise((r) => setTimeout(r, ms)));
   const cache = new Map<string, { saved: number; result: NatureSource; size: number }>(); const pending = new Map<string, Promise<NatureSource>>();
   async function query(point: LatLon, id: NatureSource['id']): Promise<NatureSource> {

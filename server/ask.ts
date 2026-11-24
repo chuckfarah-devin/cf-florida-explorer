@@ -6,6 +6,7 @@ import { createFemaService } from './fema.ts';
 import { createNoaaService, tideWindow } from './noaa.ts';
 import { CLAIM_RULES as allowed, validateClaim, immutable, type Value, type AnswerSource, type Claim } from './claim-validation.ts';
 import { createNatureAnswerService } from './nature-answer.ts';
+import { createConditionsAnswerService, currentConditionsIntent, type retrieveCurrentConditions } from './conditions-answer.ts';
 export { validateClaim } from './claim-validation.ts';
 export type { AnswerSource, Claim } from './claim-validation.ts';
 function exactQuery(url: string, point: LatLon) {
@@ -19,6 +20,7 @@ function tideQuery(url: string, stationId: string, product: string, window: Tide
 }
 export function questionIntent(question: string, window: TideRequest): 'flood' | 'tides' | 'event' | 'unsupported' {
   const q = question.toLowerCase();
+  if (/\b(route|directions|drive|driving|passable|depth|deep)\b/.test(q)) return 'unsupported';
   if (/\b(today|tonight|yesterday|tomorrow)\b|\b(last|next)\s+(week|month|year|night|day)\b|\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}[/-]\d{1,2}\b|\b(jan\w*|feb\w*|mar\w*|apr\w*|may|jun\w*|jul\w*|aug\w*|sep\w*|oct\w*|nov\w*|dec\w*)\s+\d|\b(define|what are|what is the meaning)\b/.test(q)) return 'unsupported';
   if (/\b(will|tomorrow|safe|safest|insurance|buy|guarantee|yesterday|last week|last month|forecast|protected|wildlife|wetland|species)\b/.test(q)) return 'unsupported';
   const years = q.match(/\b(?:19|20)\d{2}\b/g) ?? [];
@@ -48,13 +50,16 @@ function renderClaim(c: Claim, s: AnswerSource): string | null {
     : `At ${f.stationName}, the highest predicted astronomical high tide in the selected period was ${height} on ${time}. This is a prediction, not a measurement or weather forecast.`;
 }
 
-interface Options { fema?: Pick<ReturnType<typeof createFemaService>, 'lookup'>; noaa?: Pick<ReturnType<typeof createNoaaService>, 'lookup'>; now?: () => number }
+interface Options { fema?: Pick<ReturnType<typeof createFemaService>, 'lookup'>; noaa?: Pick<ReturnType<typeof createNoaaService>, 'lookup'>; now?: () => number; conditions?: typeof retrieveCurrentConditions }
 export function createAskService(options: Options = {}) {
   const fema = options.fema ?? createFemaService(); const noaa = options.noaa ?? createNoaaService(); const now = options.now ?? Date.now;
   const nature = createNatureAnswerService({ now });
+  const current = createConditionsAnswerService({ now, lookup: options.conditions });
   return {
     async answer(point: LatLon, selectionId: number, question: string, window: TideRequest, domain: 'water' | 'nature' = 'water') {
       if (domain === 'nature') return nature.answer(point, selectionId, question, window);
+      const currentTopic = currentConditionsIntent(question);
+      if (currentTopic) return current.answer(point, selectionId, question, window, currentTopic);
       const intent = questionIntent(question, window);
       const sources: AnswerSource[] = []; const candidates: Claim[] = []; const limitations: string[] = [];
       const statuses: { source: string; state: string }[] = [];

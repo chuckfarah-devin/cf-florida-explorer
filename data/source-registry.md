@@ -28,3 +28,12 @@ Status legend: documentation checked means an official reference was read, not t
 | S08 | ArcGIS basemap/SDK | Map presentation | Version, credentials, attribution, licensing and cost to be assessed by Devin; no reuse assumption. |
 
 Each approved connector must add exact endpoint/version, supported geometry and extent, schema, update cadence, terms URL, attribution, limits/authentication, caching policy, verification date and result, known errors, and evidence-contract mapping. No downloaded datasets or invented fixtures are included here.
+
+## MVP discovery sources added November 5–6, 2026
+
+- Wildlife: public iNaturalist v1 observations and taxa APIs, https://api.inaturalist.org/v1/docs/ ; research-grade, Florida/radius/native-status/taxonomy filters. Native is source status where reported. No fish, private or obscured records; no media copied. Counts are loaded observations, not animal abundance or a complete park checklist.
+- Panther reports: outbound official FWC map https://app.myfwc.com/hsc/PantherSightings/Home/Locations ; no FWC records scraped.
+- Historical markers: Florida Department of State / Division of Historical Resources, https://markers.flheritage.com/home/map ; embedded markerCards JSON and /home/details/{id} records. Adapter fails if schema changes.
+- Briny narrative: Boynton Beach Historical Society https://www.boyntonhistory.org/ward-millers-briny-breezes-the-early-years/ ; Historical Society of Palm Beach County https://education.pbchistory.org/pbc_community/briny-breezes/ ; Boynton Beach City Library archive https://boyntonbeachhistory.omeka.net/items/show/3180 . Short sourced chronology, no photographs reproduced; tax-payment detail unverified.
+- Drainage: SFWMD https://geoweb.sfwmd.gov/agsext1/rest/services/WaterManagementSystem/ ; DrainageAreas/MapServer/1, Canals/MapServer/5, All_Structures/MapServer/10. Regional membership/proximity and source fields, not municipal street-drain or sanitary sewer connectivity. GIS overview https://www.sfwmd.gov/science-data/gis .
+- Existing planner starter links: FWS Florida Panther refuge visitor page and NPS Big Cypress visitor page, documented in docs/wildlife-day-planner.md. Current closures are not queried.

@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 const DOMAINS = [
   { id: 'water', label: 'Water & Weather', soon: false },
   { id: 'nature', label: 'Nature & Wildlife', soon: false },
-  { id: 'history', label: 'History & Change', soon: true },
-  { id: 'land', label: 'Land & Infrastructure', soon: true },
+  { id: 'history', label: 'History & Change', soon: false },
+  { id: 'land', label: 'Land & Infrastructure', soon: false },
 ] as const;
 export type DomainId = (typeof DOMAINS)[number]['id'];
 

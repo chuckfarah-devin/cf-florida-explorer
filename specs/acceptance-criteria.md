@@ -1,3 +1,5 @@
+> Current release status: see [personal-use MVP scope](../docs/mvp-release.md), November 6, 2026. This document preserves the original design baseline; the release record identifies implemented, changed and deferred scope.
+
 # Acceptance criteria and traceability
 
 These are future validation requirements, not claims that a running application has passed tests.

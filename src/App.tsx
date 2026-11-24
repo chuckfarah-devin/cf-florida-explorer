@@ -31,6 +31,7 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
   const [status, setStatus] = useState<Rec<LayerStatus>>(allStatusOff);
   const [layersOpen, setLayersOpen] = useState(() => typeof window === 'undefined' || window.innerWidth >= 1024);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [basemapFallback, setBasemapFallback] = useState(false);
   const [askWindow, setAskWindow] = useState<TideRequest>({ startDate: '2026-10-25', endDate: '2026-10-29', datum: 'MLLW' });
   const [askState, setAskState] = useState<AskUiState | null>(null);
   const applyAskWindow = useCallback((window: TideRequest) => {
@@ -39,6 +40,7 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
   }, []);
   const mapDiv = useRef<HTMLDivElement>(null);
   const handle = useRef<MapHandle | null>(null);
+  const currentLayers = useRef(enabled);
   const api = useRef<MapApi | null>(null);
   const currentSelection = useRef(sel.current);
   const tideMarkers = useRef<TideStationMarker[]>([]);
@@ -74,9 +76,13 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
         onClick: (p) => select(p, 'pointer'),
         onEnter: () => handle.current && select(handle.current.center(), 'keyboard'),
         onLayerStatus: (id, s) => setStatus((prev) => ({ ...prev, [id]: s })),
+        onBasemapFallback: () => setBasemapFallback(true),
       });
       if (cancelled) h.destroy(); else {
         handle.current = h;
+        for (const layer of REFERENCE_LAYERS) {
+          if (currentLayers.current[layer.id]) h.setLayerVisible(layer.id, true);
+        }
         h.setTideStations?.(tideMarkers.current);
         const selected = currentSelection.current;
         h.setMarker(selected?.point ?? null);
@@ -96,7 +102,8 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
 
   const toggle = (id: ReferenceLayerId) => {
     const next = !enabled[id];
-    setEnabled({ ...enabled, [id]: next });
+    currentLayers.current = { ...enabled, [id]: next };
+    setEnabled(currentLayers.current);
     if (!next) setStatus((p) => ({ ...p, [id]: 'off' }));
     handle.current?.setLayerVisible(id, next);
   };
@@ -119,6 +126,7 @@ export default function App({ mapApi = loadMapApi }: { mapApi?: () => Promise<Ma
           <div ref={mapDiv} className="map" />
           {mapError && <p className="map-error" role="alert">{mapError}</p>}
           {devBasemap && <p className="dev-banner">Development basemap (OpenStreetMap). The ArcGIS key isn't configured.</p>}
+          {basemapFallback && <p className="dev-banner" role="status">OpenStreetMap basemap · ArcGIS is unavailable. You can still select a spot or enter coordinates.</p>}
           {sel.rejection && (
             <div className="toast" role="alert">{sel.rejection}
               <button type="button" className="linkbtn" onClick={() => dispatch({ type: 'dismissRejection' })}>Dismiss</button>

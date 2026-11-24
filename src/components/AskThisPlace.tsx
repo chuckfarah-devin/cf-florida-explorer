@@ -7,7 +7,7 @@ import { fetchAnswer } from '../ask/client';
 import { formatLatLon } from '../config/bounds';
 
 const SUGGESTIONS = {
-  water: ['What does FEMA say about flooding here?', 'What were the water levels during this period?', 'What can these records tell us about the flooding I saw?'],
+  water: ['What weather alerts apply here?', 'Are any road problems reported nearby?', 'Where is the closest traffic camera?', 'What is the weather now?', 'What does FEMA say about flooding here?', 'What were the water levels during this period?', 'What can these records tell us about the flooding I saw?'],
   nature: ['What is mapped at this spot?', 'What protected places are nearby?', 'Is this spot in a mapped wetland or aquatic preserve?'],
 };
 export interface AskUiState { scopeKey: string; domain?: 'water' | 'nature'; question?: string; response?: AskResponse; pending?: boolean; failed?: boolean }
@@ -48,7 +48,7 @@ export function AskThisPlace({ selection, window, domain, scopeKey, onState, loo
       <input id="ask-input" value={question} maxLength={500} disabled={!canAsk} onChange={(e) => setQuestion(e.target.value)} placeholder={canAsk ? 'Ask about this spot…' : 'Select a place to ask about it…'} />
       <button type="submit" className="btn" disabled={!canAsk || !question.trim()}>{pending ? 'Ask again' : 'Ask'}</button>
     </form>
-    <p id="ask-note" className="ask-note">{!selection ? 'Select a Florida place to ask a question.' : domain === 'nature' ? `${formatLatLon(selection.point)} · Mapped inventories; retrieval dates are not survey dates.` : domain !== 'water' ? 'Answers currently cover Water & Weather and Nature & Wildlife. Switch tabs to ask.' : `${formatLatLon(selection.point)} · ${window.startDate}–${window.endDate} · ${window.datum === 'NAVD' ? 'NAVD88' : 'MLLW'}. Checked FEMA and NOAA records.`}</p>
+    <p id="ask-note" className="ask-note">{!selection ? 'Select a Florida place to ask a question.' : domain === 'nature' ? `${formatLatLon(selection.point)} · Mapped inventories; retrieval dates are not survey dates.` : domain !== 'water' ? 'Answers currently cover Water & Weather and Nature & Wildlife. Switch tabs to ask.' : `${formatLatLon(selection.point)} · ${window.startDate}–${window.endDate} · ${window.datum === 'NAVD' ? 'NAVD88' : 'MLLW'}. Current alerts, weather, roads and cameras; tide dates apply only to NOAA.`}</p>
     <div className="qa" role="group" aria-label="Example questions" tabIndex={0}>{SUGGESTIONS[askDomain].map((q) => <button key={q} type="button" className="chip q" disabled={!canAsk} onClick={() => void submit(q)}>{q}</button>)}</div>
   </section>;
 }

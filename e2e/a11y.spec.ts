@@ -7,6 +7,56 @@ import { fileURLToPath } from 'node:url';
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 const SDK_ASSETS = fileURLToPath(new URL('../node_modules/@arcgis/core/assets/', import.meta.url));
 
+test('Land separates drainage context from an untraced outlet route and is accessible', async ({ page }) => {
+  await page.route('**/api/infrastructure', (r) => r.fulfill({ json: { sources: [{ id: 'watershed', label: 'Watershed at this point', state: 'ok', records: [{ name: 'LAKE WORTH LAGOON' }], queryUrl: 'https://geoweb.sfwmd.gov/', retrievedAt: '2026-11-05' }] } }));
+  await selectTyped(page);
+  await page.getByRole('button', { name: 'Land & Infrastructure', exact: true }).click();
+  for (const name of ['Show Watersheds', 'Show Canals & streams', 'Show Water-control structures']) {
+    await expect(page.getByRole('switch', { name, exact: true })).toHaveCount(1);
+  }
+  await expect(page.getByText('LAKE WORTH LAGOON')).toBeVisible();
+  await expect(page.getByText('Where does this drain go?')).toHaveCount(0);
+  await axe(page);
+  await page.setViewportSize({ width: 360, height: 800 });
+  await axe(page);
+  await page.screenshot({ path: 'scripts/out/infrastructure-mobile.png' });
+});
+
+test('History shows nearby state records with accessible mobile controls', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.route('**/api/history', (r) => r.fulfill({ json: { records: [{ id: 560, title: '1913 Boynton School', markerYear: '2007', city: 'Boynton Beach', county: 'Palm Beach', address: 'Ocean Avenue', excerpt: 'Synthetic browser fixture.', url: 'https://markers.flheritage.com/home/details/560', distanceKm: 2.5 }], retrievedAt: '2026-11-05' } }));
+  await selectTyped(page);
+  await page.getByRole('button', { name: 'History & Change', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '1913 Boynton School' })).toBeVisible();
+  await expect(page.getByText(/Marker year: 2007/)).toBeVisible();
+  await axe(page);
+  await page.screenshot({ path: 'scripts/out/history-mobile.png' });
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await axe(page);
+  await page.screenshot({ path: 'scripts/out/history-desktop.png' });
+});
+
+test('mobile wildlife interests and public day plan are accessible and persist', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.route('https://api.inaturalist.org/v1/observations**', (r) => r.fulfill({ json: { total_results: 1, results: [{ id: 123, observed_on: '2026-10-24', quality_grade: 'research', location: '26.1,-81.4', taxon: { name: 'Lynx rufus', preferred_common_name: 'Bobcat', native: true } }] } }));
+  await page.getByRole('searchbox').fill('26.1, -81.4');
+  await page.getByRole('searchbox').press('Enter');
+  await page.getByRole('button', { name: 'Nature & Wildlife', exact: true }).click();
+  await expect(page.getByText('Bobcat', { exact: true })).toBeVisible({ timeout: 20000 });
+  await page.getByLabel('Native status').selectOption('native');
+  await page.getByLabel('Animal group').selectOption('mammals');
+  await page.getByLabel('Animal type').selectOption('bobcat');
+  await expect(page.getByText('Bobcat', { exact: true })).toBeVisible({ timeout: 20000 });
+  await axe(page);
+  await page.getByRole('button', { name: 'Add to interests' }).click();
+  await page.getByRole('button', { name: 'Plan a day', exact: true }).click();
+  await expect(page.getByText('Wildlife interests: Bobcat')).toBeVisible();
+  await page.getByRole('button', { name: 'Add stop', exact: true }).first().click();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('florida-explorer-outing')!).stops.length)).toBe(1);
+  await axe(page);
+  await page.screenshot({ path: 'scripts/out/wildlife-planner-mobile.png' });
+});
+
 // Explicit synthetic fixtures: no live FEMA calls or event-validation claims in CI.
 function fixture(request: { lat: number; lon: number; selectionId: number }, state: FemaState = 'classified_near_boundary'): FemaResponse {
   return {
@@ -20,6 +70,8 @@ function fixture(request: { lat: number; lon: number; selectionId: number }, sta
 
 // External map/data services are blocked so results don't depend on third-party uptime.
 test.beforeEach(async ({ page }) => {
+  await page.route('**/api/conditions', r => r.fulfill({json:{point:r.request().postDataJSON(),checkedAt:'2026-11-19T16:00:00Z',alerts:{state:'ok',items:[{title:'Flood Watch',description:'Heavy rain possible',expires:null}]},observation:{state:'unavailable'},roads:{state:'ok',items:[]},cameras:{state:'outside_coverage',items:[]}}}));
+  await page.route('https://api.inaturalist.org/v1/observations**', (route) => route.fulfill({ json: { results: [], total_results: 0 } }));
   await page.route(/(ca|ags)\.dep\.state\.fl\.us|tile\.openstreetmap\.org|arcgis\.com/, (r) => r.abort());
   // Localization/WASM belong to the installed SDK, not a live data source. Supply local pinned assets.
   await page.route('https://js.arcgis.com/5.1.27/@arcgis/core/assets/**', async (route) => {
@@ -74,7 +126,7 @@ test('Nature shows mapped matches separately from nearby places; Show on map pre
   await selectTyped(page); await page.getByRole('button', { name: 'Nature & Wildlife', exact: true }).click();
   const nature = page.getByRole('region', { name: 'Nature at this place' });
   await expect(nature).toContainText('No conservation-land polygon was returned');
-  await expect(nature).toContainText('1.20 km N to mapped boundary');
+  await expect(nature).toContainText('0.75 mi N to mapped boundary');
   await page.getByRole('button', { name: 'Show exact location' }).click();
   await nature.getByRole('button', { name: 'Show Synthetic coastal preserve on map' }).click();
   await expect(page.locator('.coords')).toHaveText('26.50890, −80.05220');
@@ -230,4 +282,26 @@ test('mobile layer list scrolls within the map without covering the selected-pla
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(page.locator('.layers-float')).toHaveCount(0);
   await expect(page.locator('.askfoot input')).toBeInViewport();
+});
+
+test('Conditions now follows a statewide selection with accessible mobile and desktop states', async ({page}) => {
+  await selectTyped(page);
+  const card=page.getByRole('region',{name:'Conditions now',exact:true});
+  await expect(card.getByText('Flood Watch',{exact:true})).toBeVisible();
+  await expect(card).toContainText('Roads have not been confirmed clear');
+  await expect(card.getByRole('link',{name:'Open live rain radar'})).toHaveAttribute('href','https://radar.weather.gov/region/southeast/standard');
+  await axe(page);
+  await page.getByRole('searchbox').fill('30.44, -84.28');await page.getByRole('searchbox').press('Enter');
+  await expect(card.getByRole('link',{name:'Local NWS weather and alerts'})).toHaveAttribute('href','https://forecast.weather.gov/MapClick.php?lat=30.44&lon=-84.28');
+  await page.setViewportSize({width:390,height:844});await axe(page);
+  await card.getByRole('button',{name:'Refresh conditions'}).scrollIntoViewIfNeeded();await expect(page.locator('.askfoot input')).toBeInViewport();
+});
+test('current road Ask is cited, ignores historical tide dates, and clears on a new point',async({page})=>{
+  await page.route('**/api/ask',route=>{const r=route.request().postDataJSON();const fields={count:0,radiusMiles:15,checkedAt:'2026-11-24T18:00:00Z'};return route.fulfill({json:{domain:'water',selectionId:r.selectionId,point:{lat:r.lat,lon:r.lon},window:{startDate:r.startDate,endDate:r.endDate,datum:r.datum},question:r.question,packId:'synthetic-current-pack',createdAtUtc:'2026-11-24T18:00:00Z',mode:'template',intent:'conditions',supported:true,findings:[{id:'C1',text:'No FHP incidents returned within 15 mi. Roads have not been confirmed clear.',evidenceClass:'reported_road_condition',citations:['C1'],facts:Object.entries(fields).map(([field,value])=>({ref:'C1',field,value}))}],sources:[{ref:'C1',label:'FHP live road report',kind:'reported_road_condition',url:'https://trafficincidents.flhsmv.gov/SmartWebClient/CadView.aspx',retrievedAtUtc:'2026-11-24T18:00:00Z',fields}],limitations:['Reports are not a checked route.'],statuses:[{source:'FHP nearby road reports',state:'ok'}]}});});
+  await selectTyped(page);await page.getByRole('button',{name:'Are any road problems reported nearby?'}).click();const answer=page.getByRole('region',{name:'Answer for this place'});await expect(answer).toContainText('Roads have not been confirmed clear');await expect(answer).toContainText('tide-date controls do not apply');await expect(answer.getByRole('link',{name:/FHP live road report/}).first()).toHaveAttribute('href','https://trafficincidents.flhsmv.gov/SmartWebClient/CadView.aspx');await axe(page);await page.setViewportSize({width:390,height:844});await axe(page);await expect(page.locator('.askfoot input')).toBeInViewport();await page.screenshot({path:'scripts/out/current-ask-mobile.png'});
+  await page.getByRole('searchbox').fill('30.44, -84.28');await page.getByRole('searchbox').press('Enter');await expect(answer).toHaveCount(0);
+});
+test('current camera Ask explains missing regional coverage without claiming a live image',async({page})=>{
+  await page.route('**/api/ask',route=>{const r=route.request().postDataJSON();return route.fulfill({json:{domain:'water',selectionId:r.selectionId,point:{lat:r.lat,lon:r.lon},window:{startDate:r.startDate,endDate:r.endDate,datum:r.datum},question:r.question,packId:'current-no-camera',createdAtUtc:'2026-11-24T18:00:00Z',mode:'template',intent:'conditions',supported:false,findings:[],sources:[],limitations:['Direct camera listings are connected only around Palm Beach County. Use FL511 for statewide cameras.'],statuses:[{source:'Camera listings',state:'outside_coverage'}]}});});
+  await selectTyped(page);await page.getByRole('button',{name:'Where is the closest traffic camera?'}).click();const answer=page.getByRole('region',{name:'Answer for this place'});await expect(answer).toContainText('only around Palm Beach County');await expect(answer.getByRole('link',{name:'Open FL511 statewide roads and cameras'})).toHaveAttribute('href','https://www.fl511.com/');await axe(page);
 });

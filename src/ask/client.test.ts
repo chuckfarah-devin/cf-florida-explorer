@@ -42,3 +42,11 @@ it('does not accept nature evidence in a Water & Weather answer', async () => {
   vi.stubGlobal('fetch', vi.fn(async () => Response.json(response)));
   await expect(fetchAnswer(selection, window, response.question, new AbortController().signal)).rejects.toThrow('Invalid answer sources');
 });
+
+const currentData = (): AskResponse => ({...data(),intent:'conditions',question:'Are any road problems reported nearby?',sources:[{ref:'C1',label:'FHP live road report',url:'https://trafficincidents.flhsmv.gov/SmartWebClient/CadView.aspx',retrievedAtUtc:'2026-11-24T18:00:00Z',kind:'reported_road_condition',fields:{count:0,radiusMiles:15,checkedAt:'2026-11-24T18:00:00Z'}}],findings:[{id:'C1',text:'No FHP incidents returned. Roads have not been confirmed clear.',evidenceClass:'reported_road_condition',citations:['C1'],facts:[{ref:'C1',field:'count',value:0},{ref:'C1',field:'radiusMiles',value:15},{ref:'C1',field:'checkedAt',value:'2026-11-24T18:00:00Z'}]}]});
+it('accepts a current-condition answer with matching source fields and claim facts',async()=>{
+ const d=currentData();vi.stubGlobal('fetch',vi.fn(async()=>Response.json(d)));expect((await fetchAnswer(selection,window,d.question,new AbortController().signal)).intent).toBe('conditions');
+});
+it.each(['facts','missing facts','source host','historical intent','alert point'])('rejects a current answer with wrong %s',async(kind)=>{
+ const d=currentData();if(kind==='facts')d.findings[0].facts![0].value=10;if(kind==='missing facts')delete d.findings[0].facts;if(kind==='source host')d.sources[0].url='https://api.weather.gov/alerts/active';if(kind==='historical intent')d.intent='flood';if(kind==='alert point'){d.findings[0].evidenceClass='weather_alert';d.sources[0].kind='weather_alert';d.sources[0].url='https://api.weather.gov/alerts/active?point=30,-84';}vi.stubGlobal('fetch',vi.fn(async()=>Response.json(d)));await expect(fetchAnswer(selection,window,d.question,new AbortController().signal)).rejects.toThrow();
+});

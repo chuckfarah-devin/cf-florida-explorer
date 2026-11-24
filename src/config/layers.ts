@@ -1,5 +1,5 @@
 /** C7 display-only reference layers (layer-reuse-feasibility.md). No answer claims are made from them in I1. */
-export type ReferenceLayerId = 'wetlands' | 'conservation' | 'aquatic-preserves' | 'shoreline' | 'flood';
+export type ReferenceLayerId = 'wetlands' | 'conservation' | 'aquatic-preserves' | 'shoreline' | 'flood' | 'watersheds' | 'canals' | 'water-structures';
 
 export interface ReferenceLayerConfig {
   id: ReferenceLayerId;
@@ -13,6 +13,7 @@ export interface ReferenceLayerConfig {
   sourcePage: string;
   about: string;
   limitation: string;
+  popupFields?: readonly { fieldName: string; label: string }[];
 }
 
 export const REFERENCE_LAYERS: readonly ReferenceLayerConfig[] = [
@@ -74,6 +75,24 @@ export const REFERENCE_LAYERS: readonly ReferenceLayerConfig[] = [
     sourcePage: 'https://msc.fema.gov/portal/home',
     about: 'Mapped flood zones. Zoom in to see the shading and FEMA legend. The server-side lookup in the place panel determines the zone at your selected point.',
     limitation: 'Screening context, not an observed flood extent or a property-level forecast. Shading is hidden at small scales by FEMA. Effective FIRMs and applicable revisions control.',
+  },
+  {
+    id: 'watersheds', label: 'Watersheds', sourceLabel: 'SFWMD drainage areas', provider: 'South Florida Water Management District',
+    serviceUrl: 'https://geoweb.sfwmd.gov/agsext1/rest/services/WaterManagementSystem/DrainageAreas/MapServer', sublayerId: 1, render: 'feature', swatch: '#916a30',
+    sourcePage: 'https://www.sfwmd.gov/science-data/gis', about: 'Regional watershed boundaries. Click an area for its mapped name.', limitation: 'Regional drainage context; not a street-drain or sewer connection.',
+    popupFields: [{ fieldName: 'NAME', label: 'Watershed' }, { fieldName: 'HYDROID', label: 'Source feature ID' }],
+  },
+  {
+    id: 'canals', label: 'Canals & streams', sourceLabel: 'SFWMD mapped waterways', provider: 'South Florida Water Management District',
+    serviceUrl: 'https://geoweb.sfwmd.gov/agsext1/rest/services/WaterManagementSystem/Canals/MapServer', sublayerId: 5, render: 'feature', swatch: '#007a99',
+    sourcePage: 'https://www.sfwmd.gov/science-data/gis', about: 'Mapped canals, rivers and streams. Click a line for source details.', limitation: 'Lines show mapped waterways, not a verified flow direction or connection to a street drain.',
+    popupFields: [{ fieldName: 'NAME', label: 'Name' }, { fieldName: 'NHD_GNIS_NAME', label: 'Waterway name' }, { fieldName: 'HYDROID', label: 'Source feature ID' }],
+  },
+  {
+    id: 'water-structures', label: 'Water-control structures', sourceLabel: 'SFWMD regional structures', provider: 'South Florida Water Management District',
+    serviceUrl: 'https://geoweb.sfwmd.gov/agsext1/rest/services/WaterManagementSystem/All_Structures/MapServer', sublayerId: 10, render: 'feature', swatch: '#8f4574',
+    sourcePage: 'https://www.sfwmd.gov/science-data/gis', about: 'Mapped control structures and culverts from the district’s published search layer. Click a symbol for details.', limitation: 'Source inventory includes multiple structure types and providers. It is not a complete local storm-drain or sanitary-sewer network.',
+    popupFields: [{ fieldName: 'NAME', label: 'Structure' }, { fieldName: 'CANAL', label: 'Associated canal' }, { fieldName: 'SOURCE_FEATURE_CLASS', label: 'Source inventory' }],
   },
 ] as const;
 
