@@ -1,0 +1,217 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1330" height="1164" viewBox="0 0 1330 1164" font-family="Helvetica, Arial, sans-serif">
+<rect width="100%" height="100%" fill="#f6f8fa"/>
+<text x="20" y="26" font-size="14" font-weight="bold" fill="#1f2328" text-anchor="start">Florida Explorer — mobile wireframes (&lt; 768 px; drawn at 390 × 844). Proposal for G1 review, not implemented.</text>
+<text x="20" y="50" font-size="13" font-weight="bold" fill="#1f2328" text-anchor="start">A · Map + collapsed place sheet</text>
+<rect x="20" y="60" width="390" height="844" rx="28" fill="#fff" stroke="#24292f" stroke-width="2"/>
+<rect x="28" y="68" width="374" height="52" rx="20" fill="#24292f" stroke="#24292f" stroke-width="1"/>
+<text x="44" y="100" font-size="15" font-weight="bold" fill="#fff" text-anchor="start">Florida Explorer</text>
+<text x="350" y="100" font-size="18" font-weight="normal" fill="#fff" text-anchor="start">☰</text>
+<rect x="170" y="80" width="150" height="28" rx="14" fill="#fff" stroke="#d0d7de" stroke-width="1"/>
+<text x="182" y="99" font-size="11" font-weight="normal" fill="#6e7781" text-anchor="start">Search / lat, lon</text>
+<circle cx="180" cy="78" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="180" y="82.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">1</text>
+<rect x="28" y="124" width="374" height="630" rx="0" fill="#e8eef3" stroke="#8a8f98" stroke-width="1"/>
+<polygon points="259.88,124 402,124 402,754 289.8,754" fill="#cfe3f5" stroke="none" fill-opacity="1"/>
+<polygon points="215.0,124 229.96,124 252.4,754 237.44000000000003,754" fill="#cfe3f5" stroke="none" fill-opacity="1"/>
+<polygon points="229.96,124 259.88,124 289.8,754 252.4,754" fill="#f2a33a" stroke="none" fill-opacity="0.45"/>
+<polygon points="246.79,313.0 261.75,313.0 267.36,514.6 252.4,514.6" fill="#f7e08a" stroke="none" fill-opacity="0.8"/>
+<polygon points="259.88,124 274.84000000000003,124 304.76,754 289.8,754" fill="#d1242f" stroke="none" fill-opacity="0.3"/>
+<polygon points="140.2,218.5 200.04000000000002,250.0 192.56,407.5 132.72000000000003,376.0" fill="#f2a33a" stroke="none" fill-opacity="0.3"/>
+<line x1="28" y1="229.0" x2="215.0" y2="221.0" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="28" y1="334.0" x2="215.0" y2="326.0" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="28" y1="439.0" x2="215.0" y2="431.0" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="28" y1="544.0" x2="215.0" y2="536.0" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="28" y1="649.0" x2="215.0" y2="641.0" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="65.4" y1="124" x2="71.4" y2="754" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="102.8" y1="124" x2="108.8" y2="754" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="140.2" y1="124" x2="146.2" y2="754" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="177.6" y1="124" x2="183.6" y2="754" stroke="#c9d1d9" stroke-width="1"/>
+<circle cx="246.79" cy="407.5" r="16" fill="none" stroke="#0969da" stroke-width="2"/>
+<line x1="222.79" y1="407.5" x2="238.79" y2="407.5" stroke="#0969da" stroke-width="2"/>
+<line x1="254.79" y1="407.5" x2="270.78999999999996" y2="407.5" stroke="#0969da" stroke-width="2"/>
+<line x1="246.79" y1="383.5" x2="246.79" y2="399.5" stroke="#0969da" stroke-width="2"/>
+<line x1="246.79" y1="415.5" x2="246.79" y2="431.5" stroke="#0969da" stroke-width="2"/>
+<circle cx="246.79" cy="407.5" r="4" fill="#0969da" stroke="none" stroke-width="1"/>
+<circle cx="276.78999999999996" cy="379.5" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="276.78999999999996" y="384.0" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">2</text>
+<polygon points="233.70000000000002,518.2 242.70000000000002,534.2 224.70000000000002,534.2" fill="#8250df" stroke="#fff" fill-opacity="1"/>
+<rect x="36" y="132" width="119.0" height="26" rx="13" fill="#0969da" stroke="#0969da" stroke-width="1"/>
+<text x="95.5" y="149" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">Water &amp; Weather</text>
+<rect x="161.0" y="132" width="59.599999999999994" height="26" rx="13" fill="#fff" stroke="#8a8f98" stroke-width="1"/>
+<text x="190.8" y="149" font-size="11" font-weight="normal" fill="#57606a" text-anchor="middle">Nature</text>
+<rect x="226.6" y="132" width="66.19999999999999" height="26" rx="13" fill="#fff" stroke="#8a8f98" stroke-width="1"/>
+<text x="259.7" y="149" font-size="11" font-weight="normal" fill="#57606a" text-anchor="middle">History</text>
+<rect x="298.79999999999995" y="132" width="46.4" height="26" rx="13" fill="#fff" stroke="#8a8f98" stroke-width="1"/>
+<text x="321.99999999999994" y="149" font-size="11" font-weight="normal" fill="#57606a" text-anchor="middle">Land</text>
+<circle cx="384" cy="144" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="384" y="148.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">3</text>
+<rect x="350" y="170" width="44" height="44" rx="8" fill="#fff" stroke="#8a8f98" stroke-width="1"/>
+<text x="372" y="198" font-size="18" font-weight="normal" fill="#1f2328" text-anchor="middle">▤</text>
+<circle cx="344" cy="168" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="344" y="172.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">4</text>
+<rect x="350" y="222" width="44" height="44" rx="8" fill="#fff" stroke="#8a8f98" stroke-width="1"/>
+<circle cx="372" cy="244" r="9" fill="none" stroke="#24292f" stroke-width="2"/>
+<circle cx="372" cy="244" r="3" fill="#24292f" stroke="none" stroke-width="1"/>
+<rect x="36" y="694" width="180" height="44" rx="8" fill="#fff" stroke="#8a8f98" stroke-width="1"/>
+<text x="48" y="721" font-size="13" font-weight="bold" fill="#1f2328" text-anchor="start">⊕ Select map center</text>
+<circle cx="220" cy="698" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="220" y="702.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">5</text>
+<rect x="28" y="754" width="374" height="142" rx="18" fill="#fff" stroke="#8a8f98" stroke-width="1.5"/>
+<rect x="195.0" y="762" width="40" height="5" rx="3" fill="#8a8f98" stroke="#8a8f98" stroke-width="1"/>
+<text x="44" y="790" font-size="14" font-weight="bold" fill="#1f2328" text-anchor="start">26.50890, -80.05225</text>
+<text x="340" y="790" font-size="12" font-weight="normal" fill="#0969da" text-anchor="start">Copy</text>
+<rect x="44" y="802" width="161.58333333333334" height="20" rx="10" fill="#fff3d6" stroke="#f2a33a" stroke-width="1"/>
+<text x="124.79166666666667" y="816" font-size="11" font-weight="normal" fill="#7d4e00" text-anchor="middle">Zone AE · near boundary</text>
+<rect x="44" y="830" width="232.16666666666666" height="20" rx="10" fill="#f6f8fa" stroke="#8a8f98" stroke-width="1"/>
+<text x="160.08333333333331" y="844" font-size="11" font-weight="normal" fill="#24292f" text-anchor="middle">Nearest gauge 11.7 km (ocean side)</text>
+<rect x="44" y="856" width="342" height="32" rx="8" fill="#0969da" stroke="#0969da" stroke-width="1"/>
+<text x="215.0" y="877" font-size="13" font-weight="bold" fill="#fff" text-anchor="middle">Ask This Place</text>
+<circle cx="382" cy="772" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="382" y="776.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">6</text>
+<text x="450" y="50" font-size="13" font-weight="bold" fill="#1f2328" text-anchor="start">B · Place sheet (half) + Ask</text>
+<rect x="450" y="60" width="390" height="844" rx="28" fill="#fff" stroke="#24292f" stroke-width="2"/>
+<rect x="458" y="68" width="374" height="52" rx="20" fill="#24292f" stroke="#24292f" stroke-width="1"/>
+<text x="474" y="100" font-size="15" font-weight="bold" fill="#fff" text-anchor="start">Florida Explorer</text>
+<text x="780" y="100" font-size="18" font-weight="normal" fill="#fff" text-anchor="start">☰</text>
+<rect x="600" y="80" width="150" height="28" rx="14" fill="#fff" stroke="#d0d7de" stroke-width="1"/>
+<text x="612" y="99" font-size="11" font-weight="normal" fill="#6e7781" text-anchor="start">Search / lat, lon</text>
+<rect x="458" y="124" width="374" height="250" rx="0" fill="#e8eef3" stroke="#8a8f98" stroke-width="1"/>
+<polygon points="689.88,124 832,124 832,374 719.8,374" fill="#cfe3f5" stroke="none" fill-opacity="1"/>
+<polygon points="645.0,124 659.96,124 682.4,374 667.44,374" fill="#cfe3f5" stroke="none" fill-opacity="1"/>
+<polygon points="659.96,124 689.88,124 719.8,374 682.4,374" fill="#f2a33a" stroke="none" fill-opacity="0.45"/>
+<polygon points="676.79,199.0 691.75,199.0 697.36,279.0 682.4,279.0" fill="#f7e08a" stroke="none" fill-opacity="0.8"/>
+<polygon points="689.88,124 704.84,124 734.76,374 719.8,374" fill="#d1242f" stroke="none" fill-opacity="0.3"/>
+<polygon points="570.2,161.5 630.04,174.0 622.56,236.5 562.72,224.0" fill="#f2a33a" stroke="none" fill-opacity="0.3"/>
+<line x1="458" y1="165.66666666666666" x2="645.0" y2="157.66666666666666" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="458" y1="207.33333333333331" x2="645.0" y2="199.33333333333331" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="458" y1="249.0" x2="645.0" y2="241.0" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="458" y1="290.66666666666663" x2="645.0" y2="282.66666666666663" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="458" y1="332.33333333333337" x2="645.0" y2="324.33333333333337" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="495.4" y1="124" x2="501.4" y2="374" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="532.8" y1="124" x2="538.8" y2="374" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="570.2" y1="124" x2="576.2" y2="374" stroke="#c9d1d9" stroke-width="1"/>
+<line x1="607.6" y1="124" x2="613.6" y2="374" stroke="#c9d1d9" stroke-width="1"/>
+<circle cx="676.79" cy="244" r="16" fill="none" stroke="#0969da" stroke-width="2"/>
+<line x1="652.79" y1="244" x2="668.79" y2="244" stroke="#0969da" stroke-width="2"/>
+<line x1="684.79" y1="244" x2="700.79" y2="244" stroke="#0969da" stroke-width="2"/>
+<line x1="676.79" y1="220" x2="676.79" y2="236" stroke="#0969da" stroke-width="2"/>
+<line x1="676.79" y1="252" x2="676.79" y2="268" stroke="#0969da" stroke-width="2"/>
+<circle cx="676.79" cy="244" r="4" fill="#0969da" stroke="none" stroke-width="1"/>
+<rect x="458" y="360" width="374" height="536" rx="18" fill="#fff" stroke="#8a8f98" stroke-width="1.5"/>
+<rect x="625.0" y="368" width="40" height="5" rx="3" fill="#8a8f98" stroke="#8a8f98" stroke-width="1"/>
+<text x="474" y="400" font-size="13" font-weight="bold" fill="#1f2328" text-anchor="start">This place · 26.50890, -80.05225</text>
+<circle cx="812" cy="392" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="812" y="396.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">7</text>
+<rect x="470" y="412" width="350" height="86" rx="6" fill="#fff" stroke="#f2a33a" stroke-width="1.5"/>
+<text x="480" y="432" font-size="11" font-weight="bold" fill="#1f2328" text-anchor="start">FEMA flood zone at this point</text>
+<text x="480" y="452" font-size="13" font-weight="bold" fill="#9a6700" text-anchor="start">Zone AE · SFHA: yes · eff. 2024-12-20</text>
+<rect x="480" y="464" width="154.0" height="20" rx="10" fill="#fff8c5" stroke="#d4a72c" stroke-width="1"/>
+<text x="557.0" y="478" font-size="10" font-weight="normal" fill="#7d4e00" text-anchor="middle">⚠ Other zone within 15 m</text>
+<rect x="756" y="464" width="43.16666666666667" height="20" rx="10" fill="#ddf4ff" stroke="#54aeff" stroke-width="1"/>
+<text x="777.5833333333334" y="478" font-size="10" font-weight="normal" fill="#0550ae" text-anchor="middle">E1 E2</text>
+<rect x="470" y="508" width="350" height="78" rx="6" fill="#fff" stroke="#8a8f98" stroke-width="1"/>
+<text x="480" y="528" font-size="11" font-weight="bold" fill="#1f2328" text-anchor="start">NOAA tide context (stations, not this point)</text>
+<text x="480" y="548" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">● 8722670 Lake Worth Pier · 11.7 km N</text>
+<text x="480" y="566" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">▲ 8722718 Ocean Ridge ICWW · 2.0 km</text>
+<text x="480" y="582" font-size="10" font-weight="normal" fill="#57606a" text-anchor="start">Window: not set — choose dates ▾</text>
+<text x="474" y="616" font-size="14" font-weight="bold" fill="#1f2328" text-anchor="start">Ask This Place</text>
+<circle cx="600" cy="610" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="600" y="614.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">8</text>
+<rect x="470" y="626" width="350" height="76" rx="8" fill="#fff" stroke="#0969da" stroke-width="1.5"/>
+<text x="480" y="648" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">What does the evidence tell us about</text>
+<text x="480" y="666" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">flooding here?</text>
+<rect x="750" y="668" width="60" height="28" rx="6" fill="#0969da" stroke="#0969da" stroke-width="1"/>
+<text x="780" y="687" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">Ask</text>
+<text x="474" y="724" font-size="11" font-weight="bold" fill="#57606a" text-anchor="start">Suggested</text>
+<rect x="474" y="732" width="200.08333333333334" height="20" rx="10" fill="#f6f8fa" stroke="#8a8f98" stroke-width="1"/>
+<text x="574.0416666666666" y="746" font-size="11" font-weight="normal" fill="#24292f" text-anchor="middle">Is this in a FEMA flood zone?</text>
+<rect x="474" y="760" width="174.41666666666666" height="20" rx="10" fill="#f6f8fa" stroke="#8a8f98" stroke-width="1"/>
+<text x="561.2083333333334" y="774" font-size="11" font-weight="normal" fill="#24292f" text-anchor="middle">Recent high tides nearby?</text>
+<text x="474" y="810" font-size="10" font-weight="normal" fill="#57606a" text-anchor="start">On-screen keyboard pushes the sheet to full;</text>
+<text x="474" y="824" font-size="10" font-weight="normal" fill="#57606a" text-anchor="start">the coordinates header stays pinned.</text>
+<text x="880" y="50" font-size="13" font-weight="bold" fill="#1f2328" text-anchor="start">C · Answer (full) + source detail</text>
+<rect x="880" y="60" width="390" height="844" rx="28" fill="#fff" stroke="#24292f" stroke-width="2"/>
+<rect x="888" y="68" width="374" height="52" rx="20" fill="#24292f" stroke="#24292f" stroke-width="1"/>
+<text x="904" y="100" font-size="15" font-weight="bold" fill="#fff" text-anchor="start">Florida Explorer</text>
+<text x="1210" y="100" font-size="18" font-weight="normal" fill="#fff" text-anchor="start">☰</text>
+<rect x="1030" y="80" width="150" height="28" rx="14" fill="#fff" stroke="#d0d7de" stroke-width="1"/>
+<text x="1042" y="99" font-size="11" font-weight="normal" fill="#6e7781" text-anchor="start">Search / lat, lon</text>
+<rect x="888" y="124" width="374" height="772" rx="18" fill="#fff" stroke="#8a8f98" stroke-width="1.5"/>
+<rect x="1055.0" y="132" width="40" height="5" rx="3" fill="#8a8f98" stroke="#8a8f98" stroke-width="1"/>
+<text x="904" y="164" font-size="12" font-weight="normal" fill="#0969da" text-anchor="start">‹ Back to map</text>
+<text x="1100" y="164" font-size="12" font-weight="bold" fill="#1f2328" text-anchor="start">26.50890, -80.05225</text>
+<circle cx="1246" cy="158" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="1246" y="162.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">9</text>
+<text x="904" y="194" font-size="11" font-weight="normal" fill="#57606a" text-anchor="start" font-style="italic">Q: What does the evidence tell us about flooding here?</text>
+<rect x="904" y="204" width="165.66666666666666" height="20" rx="10" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1"/>
+<text x="986.8333333333334" y="218" font-size="10" font-weight="normal" fill="#57606a" text-anchor="middle">Answer from source records</text>
+<text x="904" y="246" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">• FEMA maps this point in Zone AE</text>
+<text x="904" y="266" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">  (Coastal floodplain, SFHA), effective</text>
+<text x="904" y="286" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">  2024-12-20.</text>
+<rect x="1186" y="272" width="43.16666666666667" height="20" rx="10" fill="#ddf4ff" stroke="#54aeff" stroke-width="1"/>
+<text x="1207.5833333333333" y="286" font-size="10" font-weight="normal" fill="#0550ae" text-anchor="middle">E1 E2</text>
+<text x="904" y="306" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">• Another mapped flood zone found within 15 m.</text>
+<rect x="1186" y="292" width="25.666666666666664" height="20" rx="10" fill="#ddf4ff" stroke="#54aeff" stroke-width="1"/>
+<text x="1198.8333333333333" y="306" font-size="10" font-weight="normal" fill="#0550ae" text-anchor="middle">E1</text>
+<text x="904" y="326" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">• Lake Worth Pier (11.7 km N, ocean side) is</text>
+<text x="904" y="346" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">  the nearest observed gauge; it describes</text>
+<text x="904" y="366" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">  the pier, not this point.</text>
+<rect x="1186" y="352" width="25.666666666666664" height="20" rx="10" fill="#ddf4ff" stroke="#54aeff" stroke-width="1"/>
+<text x="1198.8333333333333" y="366" font-size="10" font-weight="normal" fill="#0550ae" text-anchor="middle">E3</text>
+<circle cx="1242" cy="246" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="1242" y="250.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">10</text>
+<text x="904" y="394" font-size="12" font-weight="bold" fill="#1f2328" text-anchor="start">What the evidence can't say</text>
+<text x="904" y="414" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">• Whether water reached this street.</text>
+<text x="904" y="432" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">• FEMA map is screening only.</text>
+<text x="904" y="450" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">• Event window not set — add dates.</text>
+<rect x="900" y="480" width="350" height="150" rx="6" fill="#fff" stroke="#54aeff" stroke-width="1.5"/>
+<circle cx="1236" cy="494" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="1236" y="498.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">11</text>
+<text x="910" y="500" font-size="12" font-weight="bold" fill="#1f2328" text-anchor="start">▾ E1 — FEMA NFHL Flood Hazard Zones</text>
+<text x="910" y="522" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">Regulatory classification</text>
+<text x="910" y="541" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">Point inside polygon · 12099C_14409</text>
+<text x="910" y="560" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">Retrieved 2026-11-02 18:40 UTC · fresh</text>
+<text x="910" y="579" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">Screening only; 1:6,000; boundaries</text>
+<text x="910" y="598" font-size="11" font-weight="normal" fill="#1f2328" text-anchor="start">approximate · Query ↗ · Terms ↗</text>
+<text x="910" y="622" font-size="11" font-weight="normal" fill="#0969da" text-anchor="start">▸ E2 FIRM panel  ▸ E3 NOAA 8722670</text>
+<rect x="900" y="646" width="350" height="44" rx="8" fill="#fff" stroke="#0969da" stroke-width="1.5"/>
+<text x="910" y="673" font-size="12" font-weight="normal" fill="#6e7781" text-anchor="start">Ask a follow-up about this point…</text>
+<circle cx="1236" cy="654" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="1236" y="658.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">12</text>
+<circle cx="32" cy="930" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="32" y="934.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">1</text>
+<text x="50" y="934" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Search / coordinate entry (opens full-screen on focus).</text>
+<circle cx="32" cy="960" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="32" y="964.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">2</text>
+<text x="50" y="964" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Selected point marker; tap map to move it (confirm toast shows new coordinates).</text>
+<circle cx="32" cy="990" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="32" y="994.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">3</text>
+<text x="50" y="994" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Domain chips scroll horizontally; non-MVP domains labelled 'later'.</text>
+<circle cx="32" cy="1020" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="32" y="1024.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">4</text>
+<text x="50" y="1024" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Layers button opens a bottom sheet with toggles, legend and basemap.</text>
+<circle cx="32" cy="1050" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="32" y="1054.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">5</text>
+<text x="50" y="1054" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Select map center: keyboard and switch-access alternative to tapping.</text>
+<circle cx="32" cy="1080" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="32" y="1084.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">6</text>
+<text x="50" y="1084" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Collapsed sheet: coordinates, FEMA zone chip, nearest gauge, Ask button (44 px targets).</text>
+<circle cx="672" cy="930" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="672" y="934.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">7</text>
+<text x="690" y="934" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Half sheet: coordinates header pinned; FEMA and NOAA cards; question box.</text>
+<circle cx="672" cy="960" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="672" y="964.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">8</text>
+<text x="690" y="964" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Suggested questions; free text allowed.</text>
+<circle cx="672" cy="990" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="672" y="994.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">9</text>
+<text x="690" y="994" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Full sheet answer: header shows bound point; Back returns to map without losing the answer.</text>
+<circle cx="672" cy="1020" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="672" y="1024.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">10</text>
+<text x="690" y="1024" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Claim bullets with citation chips; tap chip expands its source below and moves focus.</text>
+<circle cx="672" cy="1050" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="672" y="1054.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">11</text>
+<text x="690" y="1054" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Source detail accordion (same fields as desktop).</text>
+<circle cx="672" cy="1080" r="11" fill="#d1242f" stroke="none" stroke-width="1"/>
+<text x="672" y="1084.5" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">12</text>
+<text x="690" y="1084" font-size="12" font-weight="normal" fill="#1f2328" text-anchor="start">Follow-up box stays scoped to the same point; moving the point starts a new thread.</text>
+</svg>
